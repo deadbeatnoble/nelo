@@ -14,16 +14,18 @@ import com.example.nelo.core.FeedResponseListener
 import com.example.nelo.core.ResponseListener
 import com.example.nelo.core.srpFeed
 import com.example.nelo.core.srpWholePage
-import com.example.nelo.model.FeedResponseModel
-import com.example.nelo.model.MangaModel
-import com.example.nelo.screen.MainScreen
-import com.example.nelo.screen.browse.BrowseScreen
+import com.example.nelo.domain.model.FeedResponseModel
+import com.example.nelo.domain.model.MangaModel
+import com.example.nelo.presentation.screen.MainScreen
+import com.example.nelo.presentation.screen.browse.BrowseScreen
 import com.example.nelo.ui.theme.NeloTheme
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.nodes.Document
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @SuppressLint("MutableCollectionMutableState")
     override fun onCreate(savedInstanceState: Bundle?) {

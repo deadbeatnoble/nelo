@@ -14,11 +14,11 @@ import com.example.nelo.core.srpChapter
 import com.example.nelo.core.srpFeed
 import com.example.nelo.core.srpMangaDetail
 import com.example.nelo.core.srpWholePage
-import com.example.nelo.model.ChapterModel
-import com.example.nelo.model.ChapterResponseModel
-import com.example.nelo.model.FeedResponseModel
-import com.example.nelo.model.MangaModel
-import com.example.nelo.model.PageModel
+import com.example.nelo.domain.model.ChapterModel
+import com.example.nelo.domain.model.ChapterResponseModel
+import com.example.nelo.domain.model.FeedResponseModel
+import com.example.nelo.domain.model.MangaModel
+import com.example.nelo.domain.model.PageModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

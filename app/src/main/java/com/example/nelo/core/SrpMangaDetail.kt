@@ -1,9 +1,9 @@
 package com.example.nelo.core
 
-import com.example.nelo.model.AuthorModel
-import com.example.nelo.model.ChapterModel
-import com.example.nelo.model.GenreModel
-import com.example.nelo.model.MangaModel
+import com.example.nelo.domain.model.AuthorModel
+import com.example.nelo.domain.model.ChapterModel
+import com.example.nelo.domain.model.GenreModel
+import com.example.nelo.domain.model.MangaModel
 import org.jsoup.nodes.Document
 
 interface MangaResponseListener {

@@ -1,7 +1,7 @@
 package com.example.nelo.core
 
-import com.example.nelo.model.ChapterResponseModel
-import com.example.nelo.model.PageModel
+import com.example.nelo.domain.model.ChapterResponseModel
+import com.example.nelo.domain.model.PageModel
 import org.jsoup.nodes.Document
 
 interface ChapterResponseListener {

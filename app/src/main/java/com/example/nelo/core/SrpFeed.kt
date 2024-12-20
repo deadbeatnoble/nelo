@@ -1,8 +1,8 @@
 package com.example.nelo.core
 
-import com.example.nelo.model.AuthorModel
-import com.example.nelo.model.FeedResponseModel
-import com.example.nelo.model.MangaModel
+import com.example.nelo.domain.model.AuthorModel
+import com.example.nelo.domain.model.FeedResponseModel
+import com.example.nelo.domain.model.MangaModel
 import org.jsoup.nodes.Document
 
 interface FeedResponseListener {
