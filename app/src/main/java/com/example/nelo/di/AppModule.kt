@@ -4,6 +4,7 @@ import com.example.nelo.data.remote.scraper.Parser
 import com.example.nelo.data.remote.scraper.WebScraper
 import com.example.nelo.data.repositories.MangaRepositoryImpl
 import com.example.nelo.domain.repositories.MangaRepository
+import com.example.nelo.domain.usecases.GetChapterDetailsUseCase
 import com.example.nelo.domain.usecases.GetMangaDetailsUseCase
 import dagger.Module
 import dagger.Provides
@@ -38,5 +39,12 @@ object AppModule {
         mangaRepository: MangaRepository
     ):GetMangaDetailsUseCase {
         return GetMangaDetailsUseCase(repository = mangaRepository)
+    }
+
+    @Provides
+    fun provideChapterDetailsUseCase(
+        mangaRepository: MangaRepository
+    ):GetChapterDetailsUseCase {
+        return GetChapterDetailsUseCase(repository = mangaRepository)
     }
 }

@@ -31,8 +31,24 @@ class MangaRepositoryImpl(
         )
     }
 
-    override suspend fun getChapterDetails(chapterUrl: String): ChapterModel {
-        TODO("Not yet implemented")
+    override suspend fun getChapterDetails(chapterUrl: String, chapterTitle: String): Result<ChapterModel> {
+        val documentResult = pageScraper.scrapeWebPage(chapterUrl)
+        return documentResult.fold(
+            onSuccess = { document ->
+                val dataResult = parser.chapterDetailsParser(doc = document, chapterTitle = chapterTitle, referrer = chapterUrl)
+                dataResult.fold(
+                    onSuccess = { data ->
+                        Result.success(data)
+                    },
+                    onFailure = { throwable ->
+                        Result.failure(throwable)
+                    }
+                )
+            },
+            onFailure = { throwable ->
+                Result.failure(throwable)
+            }
+        )
     }
 
     override suspend fun getPopularMangas(): FeedResponseModel {

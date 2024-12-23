@@ -68,16 +68,17 @@ import com.example.nelo.data.library.LibraryViewModel
 import com.example.nelo.domain.model.MangaModel
 import com.example.nelo.presentation.navigation.BottomNavScreens
 import com.example.nelo.presentation.navigation.DetailNavScreens
+import com.example.nelo.presentation.viewmodels.SharedViewModel
 import com.example.nelo.util.UiState
 
 @Composable
 fun MangaScreen(
     navController: NavHostController,
     mainViewModel: MainViewModel,
-    mangaDetailsViewModel: MangaDetailsViewModel
+    sharedViewModel: SharedViewModel
 ) {
 
-    val uiState by mangaDetailsViewModel.uiState.collectAsState()
+    val uiState by sharedViewModel.mangaDetailsUiState.collectAsState()
 
 
 
@@ -86,9 +87,9 @@ fun MangaScreen(
     val mLibraryViewModel: LibraryViewModel = ViewModelProvider(LocalViewModelStoreOwner.current!!).get(
         LibraryViewModel::class.java)
 
-    val mangaDetailLoading = mainViewModel.mangaDetailLoading.value
+    //val mangaDetailLoading = mainViewModel.mangaDetailLoading.value
     val manga = mainViewModel.mangaDetail.value
-    val mangaDetailError = mainViewModel.mangaDetailError.value
+    //val mangaDetailError = mainViewModel.mangaDetailError.value
 
     val toggleTheme = mainViewModel.toggleTheme.value
     val toggleFavorite = mLibraryViewModel.existsLibraryState.value
@@ -103,7 +104,7 @@ fun MangaScreen(
     val view = if (toggleTheme) R.drawable.outline_eye else R.drawable.filled_eye
 
     LaunchedEffect(true) {
-        mangaDetailsViewModel.getMangaDetails(mangaUrl = mainViewModel.mangaDetail.value.mangaUrl!!)
+        sharedViewModel.getMangaDetails(mangaUrl = mainViewModel.mangaDetail.value.mangaUrl!!)
         mLibraryViewModel.existState(mangaUrl = manga.mangaUrl!!)
     }
 
@@ -480,8 +481,13 @@ fun MangaScreen(
                             .padding(horizontal = 16.dp)
                             .clickable {
                                 mainViewModel._chapterDetail.value = it
-                                mainViewModel.getChapter()
-                                navController.navigate(DetailNavScreens.ChapterScreen.route)
+
+                                mainViewModel._mangaDetail.value = mangaDetail
+
+                                //mainViewModel.getChapter()
+
+                                navController.navigate("${DetailNavScreens.ChapterScreen.route}?chapterUrl=${it.chapterUrl}&chapterTitle=${it.title}")
+
                                 mainViewModel.updateUI()
                             }
                     ) {
@@ -1131,5 +1137,5 @@ fun ExtendableText(
 @Preview
 @Composable
 fun MangaScreenPreview() {
-    MangaScreen(navController = rememberNavController(), mainViewModel = MainViewModel(), mangaDetailsViewModel = hiltViewModel())
+    MangaScreen(navController = rememberNavController(), mainViewModel = MainViewModel(), sharedViewModel = hiltViewModel())
 }

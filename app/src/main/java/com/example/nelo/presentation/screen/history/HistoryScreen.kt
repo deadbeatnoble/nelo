@@ -52,6 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavHostController
@@ -64,13 +65,15 @@ import com.example.nelo.domain.model.ChapterModel
 import com.example.nelo.domain.model.MangaModel
 import com.example.nelo.presentation.navigation.DetailNavScreens
 import com.example.nelo.presentation.navigation.RootNavGraphs
+import com.example.nelo.presentation.viewmodels.SharedViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
     mainViewModel: MainViewModel,
-    navController: NavHostController
+    navController: NavHostController,
+    sharedViewModel: SharedViewModel
 ) {
     val mHistoryViewModel: HistoryViewModel = ViewModelProvider(LocalViewModelStoreOwner.current!!).get(
         HistoryViewModel::class.java)
@@ -189,10 +192,14 @@ fun HistoryScreen(
                                                 val press = PressInteraction.Press(it)
                                                 interactionSource.emit(press)
                                                 tryAwaitRelease()
-                                                interactionSource.emit(PressInteraction.Release(press))
+                                                interactionSource.emit(
+                                                    PressInteraction.Release(
+                                                        press
+                                                    )
+                                                )
                                             },
                                             onTap = { offset ->
-                                                if(navController.currentBackStackEntry?.destination?.route != DetailNavScreens.MangaScreen.route) {
+                                                if (navController.currentBackStackEntry?.destination?.route != DetailNavScreens.MangaScreen.route) {
                                                     mainViewModel._mangaDetail.value =
                                                         MangaModel(
                                                             title = it.mangaTitle,
@@ -207,14 +214,15 @@ fun HistoryScreen(
                                                             mangaUrl = it.mangaUrl,
                                                             chapterList = emptyList()
                                                         )
-                                                    mainViewModel._chapterDetail.value = ChapterModel(
-                                                        title = null,
-                                                        view = null,
-                                                        uploadedAt = null,
-                                                        chapterUrl = null,
-                                                        pages = emptyList()
-                                                    )
-                                                    mainViewModel.getManga()
+                                                    mainViewModel._chapterDetail.value =
+                                                        ChapterModel(
+                                                            title = null,
+                                                            view = null,
+                                                            uploadedAt = null,
+                                                            chapterUrl = null,
+                                                            pages = emptyList()
+                                                        )
+                                                    //mainViewModel.getManga()
                                                     navController.navigate(RootNavGraphs.DetailGraph.route)
                                                 }
                                             }
@@ -232,13 +240,18 @@ fun HistoryScreen(
                                         detectTapGestures(
                                             onLongPress = {
                                                 isContextMenuVisible.value = true
-                                                pressOffset.value = DpOffset(it.x.toDp(), it.y.toDp())
+                                                pressOffset.value =
+                                                    DpOffset(it.x.toDp(), it.y.toDp())
                                             },
                                             onPress = {
                                                 val press = PressInteraction.Press(it)
                                                 interactionSource.emit(press)
                                                 tryAwaitRelease()
-                                                interactionSource.emit(PressInteraction.Release(press))
+                                                interactionSource.emit(
+                                                    PressInteraction.Release(
+                                                        press
+                                                    )
+                                                )
                                             },
                                             onTap = { offset ->
                                                 mainViewModel._mangaDetail.value = MangaModel(
@@ -261,8 +274,11 @@ fun HistoryScreen(
                                                     chapterUrl = it.mangaChapterUrl,
                                                     pages = emptyList()
                                                 )
-                                                mainViewModel.getManga()
-                                                navController.navigate(DetailNavScreens.ChapterScreen.route)
+                                                //mainViewModel.getManga()
+
+                                                sharedViewModel.getMangaDetails(it.mangaUrl)
+                                                navController.navigate("${DetailNavScreens.ChapterScreen.route}?chapterUrl=${it.mangaChapterUrl}&chapterTitle=${it.mangaChapter}&mangaUrl=${it.mangaUrl}")
+                                                //navController.navigate(DetailNavScreens.ChapterScreen.route)
                                             }
                                         )
                                     }
@@ -326,5 +342,5 @@ fun HistoryScreen(
 @Preview
 @Composable
 fun HistoryScreenPreview() {
-    HistoryScreen(mainViewModel = MainViewModel(), navController = rememberNavController())
+    HistoryScreen(mainViewModel = MainViewModel(), navController = rememberNavController(), sharedViewModel = hiltViewModel())
 }

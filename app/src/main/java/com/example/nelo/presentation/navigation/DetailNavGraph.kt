@@ -1,17 +1,20 @@
 package com.example.nelo.presentation.navigation
 
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.nelo.MainViewModel
 import com.example.nelo.presentation.screen.chapterview.PageListView
 import com.example.nelo.presentation.screen.mangaview.MangaScreen
+import com.example.nelo.presentation.viewmodels.SharedViewModel
 
 fun NavGraphBuilder.detailNavGraph(
     navController: NavHostController,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    sharedViewModel: SharedViewModel
 ) {
     navigation(
         route = RootNavGraphs.DetailGraph.route,
@@ -19,20 +22,33 @@ fun NavGraphBuilder.detailNavGraph(
     ) {
         composable(
             route = DetailNavScreens.MangaScreen.route
-        ) { backStackEntry ->
+        ) {
             MangaScreen(
                 navController = navController,
                 mainViewModel = mainViewModel,
-                mangaDetailsViewModel = hiltViewModel(backStackEntry)
+                sharedViewModel = sharedViewModel
             )
         }
 
         composable(
-            route = DetailNavScreens.ChapterScreen.route
-        ) {
+            route = "${DetailNavScreens.ChapterScreen.route}?chapterUrl={chapterUrl}&chapterTitle={chapterTitle}",
+            arguments = listOf(
+                navArgument("chapterUrl") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+                navArgument("chapterTitle") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                }
+            )
+        ) { backStackEntry ->
             PageListView(
                 navController = navController,
-                mainViewModel = mainViewModel
+                mainViewModel = mainViewModel,
+                chapterUrl = backStackEntry.arguments?.getString("chapterUrl") ?: "",
+                chapterTitle = backStackEntry.arguments?.getString("chapterTitle") ?: "",
+                sharedViewModel = sharedViewModel
             )
         }
     }

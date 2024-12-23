@@ -112,7 +112,7 @@ fun LibraryScreen(
                                             mangaUrl = it.mangaUrl,
                                             chapterList = emptyList()
                                         )
-                                    mainViewModel.getManga()
+                                    //mainViewModel.getManga()
                                     navController.navigate(RootNavGraphs.DetailGraph.route)
                                 }
                             }

@@ -1,7 +1,6 @@
 package com.example.nelo.presentation.screen.browse
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -956,7 +955,7 @@ fun BrowseScreen(
                                                 chapterUrl = null,
                                                 pages = emptyList()
                                             )
-                                            mainViewModel.getManga()
+                                            //mainViewModel.getManga()
                                             navController.navigate(RootNavGraphs.DetailGraph.route)
                                         }
                                     }
