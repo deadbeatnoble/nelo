@@ -20,16 +20,17 @@ class SharedViewModel @Inject constructor(
     private val getMangaDetailsUseCase: GetMangaDetailsUseCase,
     private val getChapterDetailsUseCase: GetChapterDetailsUseCase
 ):ViewModel() {
+
     private val _mangaDetailsUiState = MutableStateFlow<UiState<MangaModel>>(UiState.Loading)
     val mangaDetailsUiState: StateFlow<UiState<MangaModel>> = _mangaDetailsUiState
 
     private val _chapterDetailsUiState = MutableStateFlow<UiState<ChapterModel>>(UiState.Loading)
     val chapterDetailsUiState: StateFlow<UiState<ChapterModel>> = _chapterDetailsUiState
 
-    private val _prevChapterDetails = MutableStateFlow<ChapterModel>(ChapterModel(title = null, view = null, uploadedAt = null, chapterUrl = null, pages = emptyList()))
+    private val _prevChapterDetails = MutableStateFlow(ChapterModel(title = null, view = null, uploadedAt = null, chapterUrl = null, pages = emptyList()))
     val prevChapterDetails: StateFlow<ChapterModel> = _prevChapterDetails
 
-    private val _nextChapterDetails = MutableStateFlow<ChapterModel>(ChapterModel(title = null, view = null, uploadedAt = null, chapterUrl = null, pages = emptyList()))
+    private val _nextChapterDetails = MutableStateFlow(ChapterModel(title = null, view = null, uploadedAt = null, chapterUrl = null, pages = emptyList()))
     val nextChapterDetails: StateFlow<ChapterModel> = _nextChapterDetails
 
     //methods
@@ -78,7 +79,7 @@ class SharedViewModel @Inject constructor(
         val index = (mangaDetailsUiState.value as UiState.Success<MangaModel>).data.chapterList.indexOfFirst {
             it.chapterUrl == (chapterDetailsUiState.value as UiState.Success<ChapterModel>).data.chapterUrl
         }
-        Log.e("INDEX", "Current chapter -> " + index.toString())
+        Log.e("INDEX", "Current chapter -> $index")
         Log.e("Manga UIState", mangaDetailsUiState.value.toString())
         return if (index < (mangaDetailsUiState.value as UiState.Success<MangaModel>).data.chapterList.size - 1) (mangaDetailsUiState.value as UiState.Success<MangaModel>).data.chapterList[index + 1] else ChapterModel(title = null, view = null, uploadedAt = null, chapterUrl = null, pages = emptyList())
     }
@@ -87,7 +88,7 @@ class SharedViewModel @Inject constructor(
         val index = (mangaDetailsUiState.value as UiState.Success<MangaModel>).data.chapterList.indexOfFirst {
             it.chapterUrl == (chapterDetailsUiState.value as UiState.Success<ChapterModel>).data.chapterUrl
         }
-        Log.e("INDEX", "Current chapter -> " + index.toString())
+        Log.e("INDEX", "Current chapter -> $index")
         Log.e("Manga UIState", mangaDetailsUiState.value.toString())
         return if (index > 0) (mangaDetailsUiState.value as UiState.Success<MangaModel>).data.chapterList[index - 1] else ChapterModel(title = null, view = null, uploadedAt = null, chapterUrl = null, pages = emptyList())
     }

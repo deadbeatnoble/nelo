@@ -48,11 +48,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -76,6 +80,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
@@ -86,6 +91,7 @@ import com.example.nelo.domain.model.MangaModel
 import com.example.nelo.presentation.navigation.DetailNavScreens
 import com.example.nelo.presentation.navigation.RootNavGraphs
 import com.example.nelo.util.Genres
+import com.example.nelo.util.UiState
 import kotlinx.coroutines.launch
 
 @SuppressLint("MutableCollectionMutableState", "UnrememberedMutableState")
@@ -95,8 +101,16 @@ import kotlinx.coroutines.launch
 @Composable
 fun BrowseScreen(
     navController: NavHostController,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    browseViewModel: BrowseViewModel = hiltViewModel()
 ) {
+    //val feedUiState by sharedViewModel.feedUiState.collectAsState()
+    val feedUiState by browseViewModel.feedUiState.collectAsState()
+
+
+
+
+
     val gridState = rememberLazyGridState()
     val scope = rememberCoroutineScope()
 
@@ -880,7 +894,186 @@ fun BrowseScreen(
                 }
             }
 
-            if (isLoading && feedResponse.isEmpty()) {
+            when(feedUiState) {
+                is UiState.Loading -> {
+                    CircularProgressIndicator()
+                }
+                is UiState.Success -> {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(3),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(6.dp),
+                        state = gridState,
+                        contentPadding = PaddingValues(bottom = 50.dp)
+                    ) {
+                        items((feedUiState as UiState.Success<List<MangaModel>>).data) {
+                            onUpdate
+                            Box(
+                                modifier = Modifier
+                                    .aspectRatio(225f / 337f)
+                                    .padding(6.dp)
+                                    .clickable {
+                                        if (navController.currentBackStackEntry?.destination?.route != DetailNavScreens.MangaScreen.route) {
+                                            mainViewModel._mangaDetail.value =
+                                                MangaModel(
+                                                    title = it.title,
+                                                    thumbnail = it.thumbnail,
+                                                    authors = emptyList(),
+                                                    genres = emptyList(),
+                                                    status = null,
+                                                    updatedAt = null,
+                                                    description = null,
+                                                    view = null,
+                                                    rating = it.rating,
+                                                    mangaUrl = it.mangaUrl,
+                                                    chapterList = emptyList()
+                                                )
+                                            mainViewModel._chapterDetail.value = ChapterModel(
+                                                title = null,
+                                                view = null,
+                                                uploadedAt = null,
+                                                chapterUrl = null,
+                                                pages = emptyList()
+                                            )
+                                            //mainViewModel.getManga()
+                                            navController.navigate(RootNavGraphs.DetailGraph.route)
+                                        }
+                                    }
+                            ) {
+                                AsyncImage(
+                                    model = it.thumbnail,
+                                    contentDescription = "Manga Cover",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .drawWithCache {
+                                            val gradient = Brush.verticalGradient(
+                                                colors = listOf(
+                                                    Color.Transparent,
+                                                    Color.Black.copy(alpha = 0.6f)
+                                                ),
+                                                startY = (size.height / 4) + (size.height / 2),
+                                                endY = size.height
+                                            )
+                                            onDrawWithContent {
+                                                drawContent()
+                                                drawRect(
+                                                    gradient,
+                                                    blendMode = BlendMode.Multiply
+                                                )
+                                            }
+                                        }
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.35f)
+                                        .background(Color.Black.copy(alpha = 0.6f))
+                                        .align(Alignment.TopEnd)
+                                ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier
+                                            .padding(horizontal = 3.dp)
+                                    ) {
+                                        Text(
+                                            text = it.rating ?: "?",
+                                            color = Color.White,
+                                            fontSize = 13.sp,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Icon(
+                                            imageVector = Icons.Default.Star,
+                                            contentDescription = "rate",
+                                            tint = Color.Yellow
+                                        )
+                                    }
+                                }
+
+                                Text(
+                                    text = it.title ?: "Unknown",
+                                    color = Color.White,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    lineHeight = 13.sp,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier
+                                        .align(Alignment.BottomStart)
+                                        .padding(6.dp),
+                                )
+                            }
+                        }
+
+                        item {
+                            var isFetching by remember { mutableStateOf(false) }
+
+                            LaunchedEffect((feedUiState as? UiState.Success<List<MangaModel>>)?.data?.size) {
+                                if (!isFetching && feedUiState !is UiState.Loading) {
+                                    isFetching = true
+                                    browseViewModel.getPopularMangas()
+                                    isFetching = false
+                                }
+                            }
+                            /*LaunchedEffect(true) {
+                                snapshotFlow { (feedUiState as UiState.Success<List<MangaModel>>).data.size }
+                                    .collect {
+                                        if (feedUiState !is UiState.Loading) {
+                                            browseViewModel.getPopularMangas()
+                                        }
+                                    }
+                            }*/
+                        }
+                    }
+                }
+                is UiState.Error -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(themeBackgroundColor)
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = feedResponseError,
+                                fontSize = 18.sp,
+                                color = themeTextColor
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(
+                                onClick = {
+
+                                    //////////////////////
+                                    browseViewModel.getPopularMangas()
+                                    //sharedViewModel.getPopularMangas(page = mainViewModel._currentPage.value)
+                                    //////////////////////
+
+
+
+                                    mainViewModel.getFeed()
+                                }
+                            ) {
+                                Text(
+                                    text = "Retry"
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            /*if (isLoading && feedResponse.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize(),
@@ -1037,6 +1230,8 @@ fun BrowseScreen(
                                 LaunchedEffect(true) {
                                     if (mainViewModel.selectedTab.value != tabs[2]) {
                                         mainViewModel.getFeed()
+
+                                        browseViewModel.getPopularMangas()
                                     } else {
 
                                         var url = mainViewModel.advancedSearchUrl.value
@@ -1068,7 +1263,7 @@ fun BrowseScreen(
                         }
                     }
                 }
-            }
+            }*/
         }
     }
 }

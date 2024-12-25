@@ -2,6 +2,7 @@ package com.example.nelo.data.remote.scraper
 
 import com.example.nelo.domain.model.AuthorModel
 import com.example.nelo.domain.model.ChapterModel
+import com.example.nelo.domain.model.FeedResponseModel
 import com.example.nelo.domain.model.GenreModel
 import com.example.nelo.domain.model.MangaModel
 import com.example.nelo.domain.model.PageModel
@@ -32,6 +33,32 @@ class Parser {
                 title = chapterTitle,
                 pages = doc.select("div.container-chapter-reader img").map { PageModel( title = it.attr("title") ?: null, pageImageUrl = it.attr("src") ?: null ) },
                 chapterUrl = referrer
+            )
+        )
+    }
+
+    fun feedParser(doc: Document): Result<FeedResponseModel> {
+        return Result.success(
+            FeedResponseModel(
+                response = "ok",
+                data = doc.select("div.panel-content-genres div.content-genres-item").map {
+                    MangaModel(
+                        title = it.select("div.genres-item-info h3 a").firstOrNull()?.text()?.trim(),
+                        thumbnail = it.select("a img").firstOrNull()?.attr("src"),
+                        authors = it.select("div.genres-item-info p span.genres-item-author").firstOrNull()?.text()?.split(",")?.map { AuthorModel( name = it.trim(), url = null) } ?: emptyList(),
+                        genres = emptyList(),
+                        status = null,
+                        updatedAt = it.select("div.genres-item-info p span.genres-item-time").firstOrNull()?.text()?.trim(),
+                        description = it.select("div.genres-item-info div.genres-item-description").firstOrNull()?.text()?.trim(),
+                        view = it.select("div.genres-item-info p span.genres-item-view").firstOrNull()?.text()?.trim(),
+                        rating = it.select("a em.genres-item-rate").firstOrNull()?.text()?.trim(),
+                        mangaUrl = it.select("div.genres-item-info h3 a").firstOrNull()?.attr("href"),
+                        chapterList = emptyList()
+                    )},
+                limit = doc.select("div.div.panel-content-genres").firstOrNull()?.select("div")?.size ?: 0,
+                total = doc.select("div.panel-page-number div.group-qty a.page-blue").firstOrNull()?.text()?.split(":")?.get(1)?.trim()?.replace(",", "")?.toInt() ?: doc.select("div.div.panel-content-genres").firstOrNull()?.select("div")?.size ?: 0,
+                page = doc.select("div.panel-page-number div.group-page a.page-select").firstOrNull()?.text()?.trim()?.toInt() ?: 1,
+                hasNextPage = (doc.select("div.panel-page-number div.group-page a.page-select").firstOrNull()?.text()?.trim()?.toInt() ?: 0) != (doc.select("div.panel-page-number div.group-page a.page-select").firstOrNull()?.text()?.replace("(", "")?.replace(")", "")?.toInt() ?: 0)
             )
         )
     }
