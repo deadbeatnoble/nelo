@@ -1,6 +1,7 @@
 package com.example.nelo.presentation.screen.browse
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -821,6 +822,8 @@ fun BrowseScreen(
                         modifier = Modifier
                             .clickable {
                                 mainViewModel.updateSelectedTab(tabs[0])
+
+                                browseViewModel.switchCategory(category = "popular")
                             }
                     ) {
                         Icon(
@@ -844,6 +847,8 @@ fun BrowseScreen(
                         modifier = Modifier
                             .clickable {
                                 mainViewModel.updateSelectedTab(tabs[1])
+
+                                browseViewModel.switchCategory(category = "latest")
                             }
                     ) {
                         Icon(
@@ -1019,7 +1024,8 @@ fun BrowseScreen(
                             LaunchedEffect((feedUiState as? UiState.Success<List<MangaModel>>)?.data?.size) {
                                 if (!isFetching && feedUiState !is UiState.Loading) {
                                     isFetching = true
-                                    browseViewModel.getPopularMangas()
+                                    Log.e("TESTING", "yup its the end loading the 2nd one")
+                                    browseViewModel.loadMangas()
                                     isFetching = false
                                 }
                             }
@@ -1055,7 +1061,7 @@ fun BrowseScreen(
                                 onClick = {
 
                                     //////////////////////
-                                    browseViewModel.getPopularMangas()
+                                    browseViewModel.loadMangas()
                                     //sharedViewModel.getPopularMangas(page = mainViewModel._currentPage.value)
                                     //////////////////////
 
