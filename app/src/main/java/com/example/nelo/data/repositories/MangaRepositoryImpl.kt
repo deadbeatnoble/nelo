@@ -91,8 +91,24 @@ class MangaRepositoryImpl(
         )
     }
 
-    override suspend fun getNewestMangas(): FeedResponseModel {
-        TODO("Not yet implemented")
+    override suspend fun getNewestMangas(page: Int): Result<FeedResponseModel> {
+        val documentResult = pageScraper.scrapeWebPage("https://manganato.com/genre-all${if (page > 1) "/${page}" else ""}?type=newest")
+        return documentResult.fold(
+            onSuccess = { document ->
+                val dataResult = parser.feedParser(document)
+                dataResult.fold(
+                    onSuccess = { data ->
+                        Result.success(data)
+                    },
+                    onFailure = { throwable ->
+                        Result.failure(throwable)
+                    }
+                )
+            },
+            onFailure = { throwable ->
+                Result.failure(throwable)
+            }
+        )
     }
 
     override suspend fun getFilteredMangas(): FeedResponseModel {

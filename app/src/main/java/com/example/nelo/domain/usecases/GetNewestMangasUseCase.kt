@@ -4,7 +4,7 @@ import com.example.nelo.domain.model.FeedResponseModel
 import com.example.nelo.domain.repositories.MangaRepository
 
 class GetNewestMangasUseCase(private val repository: MangaRepository) {
-    suspend operator fun invoke(): FeedResponseModel {
-        return repository.getNewestMangas()
+    suspend operator fun invoke(page: Int): Result<FeedResponseModel> {
+        return repository.getNewestMangas(page = page)
     }
 }

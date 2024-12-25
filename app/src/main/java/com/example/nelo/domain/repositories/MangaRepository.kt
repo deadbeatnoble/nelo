@@ -9,6 +9,6 @@ interface MangaRepository {
     suspend fun getChapterDetails(chapterUrl: String, chapterTitle: String): Result<ChapterModel>
     suspend fun getPopularMangas(page: Int): Result<FeedResponseModel>
     suspend fun getLatestMangas(page: Int): Result<FeedResponseModel>
-    suspend fun getNewestMangas(): FeedResponseModel
+    suspend fun getNewestMangas(page: Int): Result<FeedResponseModel>
     suspend fun getFilteredMangas(): FeedResponseModel
 }

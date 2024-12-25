@@ -7,6 +7,7 @@ import com.example.nelo.domain.repositories.MangaRepository
 import com.example.nelo.domain.usecases.GetChapterDetailsUseCase
 import com.example.nelo.domain.usecases.GetLatestMangasUseCase
 import com.example.nelo.domain.usecases.GetMangaDetailsUseCase
+import com.example.nelo.domain.usecases.GetNewestMangasUseCase
 import com.example.nelo.domain.usecases.GetPopularMangasUseCase
 import dagger.Module
 import dagger.Provides
@@ -62,5 +63,12 @@ object AppModule {
         mangaRepository: MangaRepository
     ):GetLatestMangasUseCase {
         return GetLatestMangasUseCase(repository = mangaRepository)
+    }
+
+    @Provides
+    fun provideNewestMangasUseCase(
+        mangaRepository: MangaRepository
+    ):GetNewestMangasUseCase {
+        return GetNewestMangasUseCase(repository = mangaRepository)
     }
 }
