@@ -88,6 +88,7 @@ import coil.compose.AsyncImage
 import com.example.nelo.MainViewModel
 import com.example.nelo.R
 import com.example.nelo.domain.model.ChapterModel
+import com.example.nelo.domain.model.FilterModel
 import com.example.nelo.domain.model.MangaModel
 import com.example.nelo.presentation.navigation.DetailNavScreens
 import com.example.nelo.presentation.navigation.RootNavGraphs
@@ -295,7 +296,21 @@ fun BrowseScreen(
                                     mainViewModel.feedChange.value = true
                                     mainViewModel._hasNextPage.value = true
                                     mainViewModel._feedResponse.value.clear()
-                                    mainViewModel.getAdvancedSearchFeed()
+                                    //mainViewModel.getAdvancedSearchFeed()
+
+
+                                    /////////////////////////////
+                                    browseViewModel.filter = FilterModel(
+                                        include = include.toList(),
+                                        exclude = excluded.toList(),
+                                        status = selectedStatus.value,
+                                        orderBy = selectedOrderBy.value,
+                                        keyType = selectedKeyword.value,
+                                        keyWord = keyword.value
+                                    )
+                                    browseViewModel.switchCategory(category = "filter")
+                                    /////////////////////////////
+
                                     scope.launch {
                                         bottomSheetState.collapse()
                                     }
@@ -772,7 +787,20 @@ fun BrowseScreen(
                                         mainViewModel.feedChange.value = true
                                         mainViewModel._hasNextPage.value = true
                                         mainViewModel._feedResponse.value.clear()
-                                        mainViewModel.getAdvancedSearchFeed()
+                                        //mainViewModel.getAdvancedSearchFeed()
+
+
+                                        /////////////////////////////
+                                        browseViewModel.filter = FilterModel(
+                                            include = include.toList(),
+                                            exclude = excluded.toList(),
+                                            status = selectedStatus.value,
+                                            orderBy = selectedOrderBy.value,
+                                            keyType = selectedKeyword.value,
+                                            keyWord = keyword.value
+                                        )
+                                        browseViewModel.switchCategory(category = "filter")
+                                        /////////////////////////////
                                     }
                                 ),
                                 singleLine = true,
@@ -899,11 +927,12 @@ fun BrowseScreen(
                 }
             }
 
-            when(feedUiState) {
+            when(val state = feedUiState) {
                 is UiState.Loading -> {
                     CircularProgressIndicator()
                 }
                 is UiState.Success -> {
+                    val mangaList = state.data
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(3),
                         modifier = Modifier
@@ -912,7 +941,7 @@ fun BrowseScreen(
                         state = gridState,
                         contentPadding = PaddingValues(bottom = 50.dp)
                     ) {
-                        items((feedUiState as UiState.Success<List<MangaModel>>).data) {
+                        items(mangaList) {
                             onUpdate
                             Box(
                                 modifier = Modifier
@@ -1067,7 +1096,7 @@ fun BrowseScreen(
 
 
 
-                                    mainViewModel.getFeed()
+                                    //mainViewModel.getFeed()
                                 }
                             ) {
                                 Text(
@@ -1078,198 +1107,6 @@ fun BrowseScreen(
                     }
                 }
             }
-
-            /*if (isLoading && feedResponse.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                if (feedResponseError.isNotEmpty() && feedResponse.isEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(themeBackgroundColor)
-                            .padding(32.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = feedResponseError,
-                                fontSize = 18.sp,
-                                color = themeTextColor
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Button(
-                                onClick = {
-                                    mainViewModel.getFeed()
-                                }
-                            ) {
-                                Text(
-                                    text = "Retry"
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(3),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(6.dp),
-                        state = gridState,
-                        contentPadding = PaddingValues(bottom = 50.dp)
-                    ) {
-                        items(feedResponse) {
-                            onUpdate
-                            Box(
-                                modifier = Modifier
-                                    .aspectRatio(225f / 337f)
-                                    .padding(6.dp)
-                                    .clickable {
-                                        if (navController.currentBackStackEntry?.destination?.route != DetailNavScreens.MangaScreen.route) {
-                                            mainViewModel._mangaDetail.value =
-                                                MangaModel(
-                                                    title = it.title,
-                                                    thumbnail = it.thumbnail,
-                                                    authors = emptyList(),
-                                                    genres = emptyList(),
-                                                    status = null,
-                                                    updatedAt = null,
-                                                    description = null,
-                                                    view = null,
-                                                    rating = it.rating,
-                                                    mangaUrl = it.mangaUrl,
-                                                    chapterList = emptyList()
-                                                )
-                                            mainViewModel._chapterDetail.value = ChapterModel(
-                                                title = null,
-                                                view = null,
-                                                uploadedAt = null,
-                                                chapterUrl = null,
-                                                pages = emptyList()
-                                            )
-                                            //mainViewModel.getManga()
-                                            navController.navigate(RootNavGraphs.DetailGraph.route)
-                                        }
-                                    }
-                            ) {
-                                AsyncImage(
-                                    model = it.thumbnail,
-                                    contentDescription = "Manga Cover",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                )
-
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .drawWithCache {
-                                            val gradient = Brush.verticalGradient(
-                                                colors = listOf(
-                                                    Color.Transparent,
-                                                    Color.Black.copy(alpha = 0.6f)
-                                                ),
-                                                startY = (size.height / 4) + (size.height / 2),
-                                                endY = size.height
-                                            )
-                                            onDrawWithContent {
-                                                drawContent()
-                                                drawRect(
-                                                    gradient,
-                                                    blendMode = BlendMode.Multiply
-                                                )
-                                            }
-                                        }
-                                )
-
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth(0.35f)
-                                        .background(Color.Black.copy(alpha = 0.6f))
-                                        .align(Alignment.TopEnd)
-                                ) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier
-                                            .padding(horizontal = 3.dp)
-                                    ) {
-                                        Text(
-                                            text = it.rating ?: "?",
-                                            color = Color.White,
-                                            fontSize = 13.sp,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        Icon(
-                                            imageVector = Icons.Default.Star,
-                                            contentDescription = "rate",
-                                            tint = Color.Yellow
-                                        )
-                                    }
-                                }
-
-                                Text(
-                                    text = it.title ?: "Unknown",
-                                    color = Color.White,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    lineHeight = 13.sp,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier
-                                        .align(Alignment.BottomStart)
-                                        .padding(6.dp),
-                                )
-                            }
-                        }
-
-                        item {
-                            if (isEndReached.value) {
-                                LaunchedEffect(true) {
-                                    if (mainViewModel.selectedTab.value != tabs[2]) {
-                                        mainViewModel.getFeed()
-
-                                        browseViewModel.getPopularMangas()
-                                    } else {
-
-                                        var url = mainViewModel.advancedSearchUrl.value
-                                        var spliturl = url.split("&").toMutableList()
-                                        for (miniurl in spliturl) {
-                                            if (miniurl.startsWith("page=")) {
-                                                spliturl[spliturl.indexOf(miniurl)] = "page=${mainViewModel._currentPage.value}"
-                                            }
-                                        }
-                                        url = spliturl.joinToString("&")
-
-                                        mainViewModel.advancedSearchUrl.value = url
-                                        mainViewModel.getAdvancedSearchFeed()
-                                    }
-                                }
-                            }
-                        }
-
-                        item {
-                            if (isLoading) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator()
-                                }
-                            }
-                        }
-                    }
-                }
-            }*/
         }
     }
 }

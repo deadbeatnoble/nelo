@@ -2,7 +2,9 @@ package com.example.nelo.presentation.screen.browse
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.example.nelo.domain.model.FilterModel
 import com.example.nelo.domain.model.MangaModel
+import com.example.nelo.domain.usecases.GetFilteredMangasUseCase
 import com.example.nelo.domain.usecases.GetLatestMangasUseCase
 import com.example.nelo.domain.usecases.GetNewestMangasUseCase
 import com.example.nelo.domain.usecases.GetPopularMangasUseCase
@@ -19,13 +21,15 @@ import javax.inject.Inject
 class BrowseViewModel @Inject constructor(
     private val getPopularMangasUseCase: GetPopularMangasUseCase,
     private val getLatestMangasUseCase: GetLatestMangasUseCase,
-    private val getNewestMangasUseCase: GetNewestMangasUseCase
+    private val getNewestMangasUseCase: GetNewestMangasUseCase,
+    private val getFilteredMangasUseCase: GetFilteredMangasUseCase
 ): ViewModel() {
     private val _feedUiState = MutableStateFlow<UiState<List<MangaModel>>>(UiState.Loading)
     val feedUiState: StateFlow<UiState<List<MangaModel>>> = _feedUiState
 
     private var currentPage: Int = 1
     private var currentCategory: String = "popular"
+    var filter = FilterModel(emptyList(), emptyList(), "", "", "", "")
 
 
     init {
@@ -37,22 +41,28 @@ class BrowseViewModel @Inject constructor(
             currentPage = 1
             _feedUiState.value = UiState.Success(emptyList())
         }
+        val existingMangas = if (_feedUiState.value is UiState.Success) {
+            (_feedUiState.value as UiState.Success<List<MangaModel>>).data
+        } else {
+            emptyList()
+        }
+
+        _feedUiState.value = UiState.Loading
 
         CoroutineScope(Dispatchers.IO).launch {
             val result = when (currentCategory) {
                 "popular" -> getPopularMangasUseCase(currentPage)
                 "latest" -> getLatestMangasUseCase(currentPage)
                 "newest" -> getNewestMangasUseCase(currentPage)
-                else -> getPopularMangasUseCase(currentPage) // to be fixed
+                "filter" -> getFilteredMangasUseCase(filter = filter, currentPage)
+                else -> getPopularMangasUseCase(currentPage)
             }
 
             if (result.isSuccess) {
-                _feedUiState.value = when (_feedUiState.value) {
-                    is UiState.Success -> UiState.Success((_feedUiState.value as UiState.Success<List<MangaModel>>).data + (result.getOrNull()?.data ?: emptyList()))
-                    else -> UiState.Success(result.getOrNull()?.data ?: emptyList())
-                }
+                _feedUiState.value = UiState.Success(existingMangas + (result.getOrNull()?.data ?: emptyList()))
                 currentPage++
 
+                Log.e("OLD LIST", "old -> " + existingMangas.size.toString() + " new -> " + (_feedUiState.value as UiState.Success<List<MangaModel>>).data.size + " total: " + (existingMangas + (result.getOrNull()?.data ?: emptyList())).size)
                 Log.e("$currentCategory MANGAS", "size: " + (_feedUiState.value as UiState.Success<List<MangaModel>>).data.size.toString() + " -> " + (_feedUiState.value as UiState.Success<List<MangaModel>>).data.lastOrNull()?.title)
             } else {
                 _feedUiState.value = UiState.Error(result.exceptionOrNull()?.message ?: "An error occurred")

@@ -4,6 +4,7 @@ import com.example.nelo.data.remote.scraper.Parser
 import com.example.nelo.data.remote.scraper.WebScraper
 import com.example.nelo.domain.model.ChapterModel
 import com.example.nelo.domain.model.FeedResponseModel
+import com.example.nelo.domain.model.FilterModel
 import com.example.nelo.domain.model.MangaModel
 import com.example.nelo.domain.repositories.MangaRepository
 
@@ -111,8 +112,56 @@ class MangaRepositoryImpl(
         )
     }
 
-    override suspend fun getFilteredMangas(): FeedResponseModel {
-        TODO("Not yet implemented")
+    override suspend fun getFilteredMangas(filter: FilterModel, page: Int): Result<FeedResponseModel> {
+        val url = buildString {
+            append("https://m.manganelo.com/advanced_search?s=all/")
+
+            if (filter.include.isNotEmpty()) {
+                append("&g_i=_${filter.include.joinToString("_")}_")
+            }
+
+            if (filter.exclude.isNotEmpty()) {
+                append("&g_e=_${filter.include.joinToString("_")}_")
+            }
+
+            if (filter.status.isNotEmpty()) {
+                append("&sts=${filter.status}")
+            }
+
+            if (filter.orderBy.isNotEmpty()) {
+                append("&orby=${filter.orderBy}")
+            }
+
+            if (page > 1) {
+                append("&page=${page}")
+            }
+
+            if (filter.keyType.isNotEmpty()) {
+                append("&keyt=${filter.keyType}")
+            }
+
+            if (filter.keyWord.isNotEmpty()) {
+                append("&keyw=${filter.keyWord}")
+            }
+        }
+
+        val documentData = pageScraper.scrapeWebPage(url)
+        return documentData.fold(
+            onSuccess = { document ->
+                val dataResult = parser.feedParser(document)
+                dataResult.fold(
+                    onSuccess = { data ->
+                        Result.success(data)
+                    },
+                    onFailure = { throwable ->
+                        Result.failure(throwable)
+                    }
+                )
+            },
+            onFailure = { throwable ->
+                Result.failure(throwable)
+            }
+        )
     }
 
 }
