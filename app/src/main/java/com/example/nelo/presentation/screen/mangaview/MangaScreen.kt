@@ -62,7 +62,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.nelo.MainViewModel
 import com.example.nelo.R
-import com.example.nelo.data.history.HistoryViewModel
+import com.example.nelo.presentation.viewmodels.HistoryViewModel
 import com.example.nelo.data.library.LibraryEntity
 import com.example.nelo.data.library.LibraryViewModel
 import com.example.nelo.domain.model.MangaModel
@@ -75,15 +75,15 @@ import com.example.nelo.util.UiState
 fun MangaScreen(
     navController: NavHostController,
     mainViewModel: MainViewModel,
-    sharedViewModel: SharedViewModel
+    sharedViewModel: SharedViewModel,
+    historyViewModel: HistoryViewModel
 ) {
 
     val uiState by sharedViewModel.mangaDetailsUiState.collectAsState()
 
 
 
-    val mHistoryViewModel: HistoryViewModel = ViewModelProvider(LocalViewModelStoreOwner.current!!).get(
-        HistoryViewModel::class.java)
+    //val mHistoryViewModel: HistoryViewModel = ViewModelProvider(LocalViewModelStoreOwner.current!!).get(HistoryViewModel::class.java)
     val mLibraryViewModel: LibraryViewModel = ViewModelProvider(LocalViewModelStoreOwner.current!!).get(
         LibraryViewModel::class.java)
 
@@ -498,7 +498,7 @@ fun MangaScreen(
                         ) {
                             Text(
                                 text = it.title ?: "",
-                                color = if(mHistoryViewModel.existHistory(mangaChapterUrl = it.chapterUrl!!)) themeTextColor.copy(alpha = 0.6f) else themeTextColor,
+                                color = if(historyViewModel.existHistory(mangaChapterUrl = it.chapterUrl!!)) themeTextColor.copy(alpha = 0.6f) else themeTextColor,
                                 fontSize = 14.sp,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -672,5 +672,5 @@ fun ExtendableText(
 @Preview
 @Composable
 fun MangaScreenPreview() {
-    MangaScreen(navController = rememberNavController(), mainViewModel = MainViewModel(), sharedViewModel = hiltViewModel())
+    MangaScreen(navController = rememberNavController(), mainViewModel = MainViewModel(), sharedViewModel = hiltViewModel(), historyViewModel = hiltViewModel())
 }

@@ -28,15 +28,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.example.nelo.MainViewModel
-import com.example.nelo.data.history.HistoryEntity
-import com.example.nelo.data.history.HistoryViewModel
+import com.example.nelo.data.model.HistoryEntity
+import com.example.nelo.presentation.viewmodels.HistoryViewModel
 import com.example.nelo.domain.model.ChapterModel
 import com.example.nelo.presentation.viewmodels.SharedViewModel
 import com.example.nelo.util.UiState
@@ -47,7 +45,8 @@ fun PageListView(
     mainViewModel: MainViewModel,
     chapterUrl: String,
     chapterTitle: String,
-    sharedViewModel: SharedViewModel
+    sharedViewModel: SharedViewModel,
+    historyViewModel: HistoryViewModel
 ) {
     val uiState by sharedViewModel.chapterDetailsUiState.collectAsState()
     val prevChapterDetail by sharedViewModel.prevChapterDetails.collectAsState()
@@ -58,8 +57,7 @@ fun PageListView(
     }
 
 
-    val mHistoryViewModel: HistoryViewModel = ViewModelProvider(LocalViewModelStoreOwner.current!!).get(
-        HistoryViewModel::class.java)
+    //val mHistoryViewModel: HistoryViewModel = ViewModelProvider(LocalViewModelStoreOwner.current!!).get(HistoryViewModel::class.java)
 
     val toggleTheme = mainViewModel.toggleTheme.value
     val manga = mainViewModel.mangaDetail.value
@@ -79,7 +77,7 @@ fun PageListView(
         is UiState.Success -> {
             val chapterDetail = (uiState as UiState.Success<ChapterModel>).data
             //addToHistory()
-            mHistoryViewModel.addHistory(
+            historyViewModel.addHistory(
                 historyEntity = HistoryEntity(
                     id = 0,
                     mangaTitle = manga.title!!,
@@ -528,5 +526,5 @@ fun PageListView(
 @Preview
 @Composable
 fun PageListViewPreview() {
-    PageListView(navController = rememberNavController(), mainViewModel = MainViewModel(), chapterUrl = "", chapterTitle = "", sharedViewModel = hiltViewModel())
+    PageListView(navController = rememberNavController(), mainViewModel = MainViewModel(), chapterUrl = "", chapterTitle = "", sharedViewModel = hiltViewModel(), historyViewModel = hiltViewModel())
 }

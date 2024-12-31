@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.nelo.MainViewModel
+import com.example.nelo.presentation.viewmodels.HistoryViewModel
 import com.example.nelo.presentation.screen.browse.BrowseScreen
 import com.example.nelo.presentation.screen.history.HistoryScreen
 import com.example.nelo.presentation.screen.library.LibraryScreen
@@ -15,7 +16,8 @@ import com.example.nelo.presentation.viewmodels.SharedViewModel
 fun BottomNavGraph(
     mainViewModel: MainViewModel,
     navController: NavHostController,
-    sharedViewModel: SharedViewModel = hiltViewModel()
+    sharedViewModel: SharedViewModel = hiltViewModel(),
+    historyViewModel: HistoryViewModel = hiltViewModel()
 ) {
     NavHost(
         navController = navController,
@@ -44,13 +46,15 @@ fun BottomNavGraph(
             HistoryScreen(
                 mainViewModel = mainViewModel,
                 navController = navController,
-                sharedViewModel = sharedViewModel
+                sharedViewModel = sharedViewModel,
+                historyViewModel = historyViewModel
             )
         }
         detailNavGraph(
             navController = navController,
             mainViewModel = mainViewModel,
-            sharedViewModel = sharedViewModel
+            sharedViewModel = sharedViewModel,
+            historyViewModel = historyViewModel
         )
     }
 }

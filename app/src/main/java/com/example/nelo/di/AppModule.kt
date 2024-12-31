@@ -1,9 +1,20 @@
 package com.example.nelo.di
 
+import android.app.Application
+import android.content.Context
+import com.example.nelo.data.local.history.HistoryDao
+import com.example.nelo.data.local.history.HistoryDatabase
+import com.example.nelo.data.repositories.HistoryRepositoryImpl
 import com.example.nelo.data.remote.scraper.Parser
 import com.example.nelo.data.remote.scraper.WebScraper
 import com.example.nelo.data.repositories.MangaRepositoryImpl
+import com.example.nelo.domain.repositories.HistoryRepository
 import com.example.nelo.domain.repositories.MangaRepository
+import com.example.nelo.domain.usecases.AddHistoryUseCase
+import com.example.nelo.domain.usecases.ClearHistoryUseCase
+import com.example.nelo.domain.usecases.DeleteHistoryUseCase
+import com.example.nelo.domain.usecases.ExistHistoryUseCase
+import com.example.nelo.domain.usecases.GetAllHistoryUseCase
 import com.example.nelo.domain.usecases.GetChapterDetailsUseCase
 import com.example.nelo.domain.usecases.GetFilteredMangasUseCase
 import com.example.nelo.domain.usecases.GetLatestMangasUseCase
@@ -14,6 +25,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -78,5 +90,64 @@ object AppModule {
         mangaRepository: MangaRepository
     ):GetFilteredMangasUseCase {
         return GetFilteredMangasUseCase(repository = mangaRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideContext(app: Application): Context = app.applicationContext
+
+    @Provides
+    @Singleton
+    fun provideHistoryDatabase(context: Context): HistoryDatabase {
+        return HistoryDatabase.getDatabase(context)
+    }
+
+    @Provides
+    fun provideHistoryDao(
+        database: HistoryDatabase
+    ): HistoryDao {
+        return database.historyDao()
+    }
+
+    @Provides
+    fun provideHistoryRepository(
+        historyDao: HistoryDao
+    ):HistoryRepository {
+        return HistoryRepositoryImpl(historyDao = historyDao)
+    }
+
+    @Provides
+    fun provideAddHistoryUseCase(
+        historyRepository: HistoryRepository
+    ):AddHistoryUseCase {
+        return AddHistoryUseCase(historyRepository = historyRepository)
+    }
+
+    @Provides
+    fun provideClearHistoryUseCase(
+        historyRepository: HistoryRepository
+    ):ClearHistoryUseCase {
+        return ClearHistoryUseCase(historyRepository = historyRepository)
+    }
+
+    @Provides
+    fun provideDeleteHistoryUseCase(
+        historyRepository: HistoryRepository
+    ):DeleteHistoryUseCase {
+        return DeleteHistoryUseCase(historyRepository = historyRepository)
+    }
+
+    @Provides
+    fun provideExistHistoryUseCase(
+        historyRepository: HistoryRepository
+    ):ExistHistoryUseCase {
+        return ExistHistoryUseCase(historyRepository = historyRepository)
+    }
+
+    @Provides
+    fun provideGetAllHistoryUseCase(
+        historyRepository: HistoryRepository
+    ):GetAllHistoryUseCase {
+        return GetAllHistoryUseCase(historyRepository = historyRepository)
     }
 }

@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.nelo.MainViewModel
+import com.example.nelo.presentation.viewmodels.HistoryViewModel
 import com.example.nelo.presentation.screen.chapterview.PageListView
 import com.example.nelo.presentation.screen.mangaview.MangaScreen
 import com.example.nelo.presentation.viewmodels.SharedViewModel
@@ -14,7 +15,8 @@ import com.example.nelo.presentation.viewmodels.SharedViewModel
 fun NavGraphBuilder.detailNavGraph(
     navController: NavHostController,
     mainViewModel: MainViewModel,
-    sharedViewModel: SharedViewModel
+    sharedViewModel: SharedViewModel,
+    historyViewModel: HistoryViewModel
 ) {
     navigation(
         route = RootNavGraphs.DetailGraph.route,
@@ -26,7 +28,8 @@ fun NavGraphBuilder.detailNavGraph(
             MangaScreen(
                 navController = navController,
                 mainViewModel = mainViewModel,
-                sharedViewModel = sharedViewModel
+                sharedViewModel = sharedViewModel,
+                historyViewModel = historyViewModel
             )
         }
 
@@ -48,7 +51,8 @@ fun NavGraphBuilder.detailNavGraph(
                 mainViewModel = mainViewModel,
                 chapterUrl = backStackEntry.arguments?.getString("chapterUrl") ?: "",
                 chapterTitle = backStackEntry.arguments?.getString("chapterTitle") ?: "",
-                sharedViewModel = sharedViewModel
+                sharedViewModel = sharedViewModel,
+                historyViewModel = historyViewModel
             )
         }
     }

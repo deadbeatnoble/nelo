@@ -1,50 +1,63 @@
-package com.example.nelo.data.history
+package com.example.nelo.presentation.viewmodels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nelo.data.model.HistoryEntity
+import com.example.nelo.domain.usecases.AddHistoryUseCase
+import com.example.nelo.domain.usecases.ClearHistoryUseCase
+import com.example.nelo.domain.usecases.DeleteHistoryUseCase
+import com.example.nelo.domain.usecases.ExistHistoryUseCase
+import com.example.nelo.domain.usecases.GetAllHistoryUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class HistoryViewModel(application: Application): AndroidViewModel(application) {
+@HiltViewModel
+class HistoryViewModel @Inject constructor(
+    private val getAllHistoryUseCase: GetAllHistoryUseCase,
+    private val addHistoryUseCase: AddHistoryUseCase,
+    private val deleteHistoryUseCase: DeleteHistoryUseCase,
+    private val clearHistoryUseCase: ClearHistoryUseCase,
+    private val existHistoryUseCase: ExistHistoryUseCase
+): ViewModel() {
 
-    private val getAllHistory: LiveData<List<HistoryEntity>>
-    private val repository: HistoryRepository
+    private val getAllHistory: LiveData<List<HistoryEntity>> = getAllHistoryUseCase()
+    //private val repository: HistoryRepositoryImpl
 
-    init {
-        val historyDao = HistoryDatabase.getDatabase(application).historyDao()
-        repository = HistoryRepository(historyDao)
-        getAllHistory = repository.getAllHistory
-    }
+    /*init {
+        //val historyDao = HistoryDatabase.getDatabase(application).historyDao()
+        //repository = HistoryRepositoryImpl(historyDao)
+    }*/
 
     fun addHistory(historyEntity: HistoryEntity) {
         viewModelScope.launch(Dispatchers.IO) {
-            if (!existHistory(mangaChapterUrl = historyEntity.mangaChapterUrl)) {
-                repository.addHistory(historyEntity = historyEntity)
+            if (!existHistoryUseCase(mangaChapterUrl = historyEntity.mangaChapterUrl)) {
+                addHistoryUseCase(historyEntity = historyEntity)
             }
         }
     }
 
     fun deleteHistory(mangaChapterUrl: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.deleteHistory(mangaChapterUrl = mangaChapterUrl)
+            deleteHistoryUseCase(mangaChapterUrl = mangaChapterUrl)
         }
     }
 
     fun clearHistory() {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.clearHistory()
+            clearHistoryUseCase()
         }
     }
 
     fun existHistory(mangaChapterUrl: String): Boolean = runBlocking {
         withContext(Dispatchers.IO) {
-            repository.existHistory(mangaChapterUrl = mangaChapterUrl)
+            existHistoryUseCase(mangaChapterUrl = mangaChapterUrl)
         }
     }
 

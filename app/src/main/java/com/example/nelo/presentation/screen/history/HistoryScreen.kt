@@ -53,14 +53,12 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.nelo.MainViewModel
 import com.example.nelo.R
-import com.example.nelo.data.history.HistoryViewModel
+import com.example.nelo.presentation.viewmodels.HistoryViewModel
 import com.example.nelo.domain.model.ChapterModel
 import com.example.nelo.domain.model.MangaModel
 import com.example.nelo.presentation.navigation.DetailNavScreens
@@ -73,13 +71,13 @@ import com.example.nelo.presentation.viewmodels.SharedViewModel
 fun HistoryScreen(
     mainViewModel: MainViewModel,
     navController: NavHostController,
-    sharedViewModel: SharedViewModel
+    sharedViewModel: SharedViewModel,
+    historyViewModel: HistoryViewModel
 ) {
-    val mHistoryViewModel: HistoryViewModel = ViewModelProvider(LocalViewModelStoreOwner.current!!).get(
-        HistoryViewModel::class.java)
+    //val mHistoryViewModel: HistoryViewModel = ViewModelProvider(LocalViewModelStoreOwner.current!!).get(HistoryViewModel::class.java)
 
     val toggleTheme = mainViewModel.toggleTheme.value
-    val history by mHistoryViewModel.mangaHistory.collectAsState()
+    val history by historyViewModel.mangaHistory.collectAsState()
 
     val themeBackgroundColor = if (toggleTheme) Color.White else Color.Black
     val themeTextColor = if (toggleTheme) Color.Black else Color.White
@@ -90,7 +88,7 @@ fun HistoryScreen(
     //mHistoryViewModel.deleteHistory(mangaChapterUrl = it.mangaChapterUrl)
 
     LaunchedEffect(true) {
-        mHistoryViewModel.getHistory()
+        historyViewModel.getHistory()
     }
 
     Scaffold(
@@ -126,7 +124,7 @@ fun HistoryScreen(
                     ) {
                         DropdownMenuItem(
                             onClick = {
-                                mHistoryViewModel.clearHistory()
+                                historyViewModel.clearHistory()
                                 optionsExpanded.value = false
                             }
                         ) {
@@ -318,7 +316,7 @@ fun HistoryScreen(
                                 .background(themeBackgroundColor)
                         ) {
                             DropdownMenuItem(onClick = {
-                                mHistoryViewModel.deleteHistory(mangaChapterUrl = it.mangaChapterUrl)
+                                historyViewModel.deleteHistory(mangaChapterUrl = it.mangaChapterUrl)
                                 isContextMenuVisible.value = false
                             }) {
                                 Text(
@@ -342,5 +340,5 @@ fun HistoryScreen(
 @Preview
 @Composable
 fun HistoryScreenPreview() {
-    HistoryScreen(mainViewModel = MainViewModel(), navController = rememberNavController(), sharedViewModel = hiltViewModel())
+    HistoryScreen(mainViewModel = MainViewModel(), navController = rememberNavController(), sharedViewModel = hiltViewModel(), historyViewModel = hiltViewModel())
 }
