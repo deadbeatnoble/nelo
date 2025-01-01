@@ -63,8 +63,8 @@ import coil.compose.AsyncImage
 import com.example.nelo.MainViewModel
 import com.example.nelo.R
 import com.example.nelo.presentation.viewmodels.HistoryViewModel
-import com.example.nelo.data.library.LibraryEntity
-import com.example.nelo.data.library.LibraryViewModel
+import com.example.nelo.data.model.LibraryEntity
+import com.example.nelo.presentation.viewmodels.LibraryViewModel
 import com.example.nelo.domain.model.MangaModel
 import com.example.nelo.presentation.navigation.BottomNavScreens
 import com.example.nelo.presentation.navigation.DetailNavScreens
@@ -76,7 +76,8 @@ fun MangaScreen(
     navController: NavHostController,
     mainViewModel: MainViewModel,
     sharedViewModel: SharedViewModel,
-    historyViewModel: HistoryViewModel
+    historyViewModel: HistoryViewModel,
+    libraryViewModel: LibraryViewModel
 ) {
 
     val uiState by sharedViewModel.mangaDetailsUiState.collectAsState()
@@ -84,15 +85,14 @@ fun MangaScreen(
 
 
     //val mHistoryViewModel: HistoryViewModel = ViewModelProvider(LocalViewModelStoreOwner.current!!).get(HistoryViewModel::class.java)
-    val mLibraryViewModel: LibraryViewModel = ViewModelProvider(LocalViewModelStoreOwner.current!!).get(
-        LibraryViewModel::class.java)
+    //val mLibraryViewModel: LibraryViewModel = ViewModelProvider(LocalViewModelStoreOwner.current!!).get(LibraryViewModel::class.java)
 
     //val mangaDetailLoading = mainViewModel.mangaDetailLoading.value
     val manga = mainViewModel.mangaDetail.value
     //val mangaDetailError = mainViewModel.mangaDetailError.value
 
     val toggleTheme = mainViewModel.toggleTheme.value
-    val toggleFavorite = mLibraryViewModel.existsLibraryState.value
+    val toggleFavorite = libraryViewModel.existsLibraryState.value
 
     val themeBackgroundColor = if (toggleTheme) Color.White else Color.Black
     val themeTextColor = if (toggleTheme) Color.Black else Color.White
@@ -105,7 +105,7 @@ fun MangaScreen(
 
     LaunchedEffect(true) {
         sharedViewModel.getMangaDetails(mangaUrl = mainViewModel.mangaDetail.value.mangaUrl!!)
-        mLibraryViewModel.existState(mangaUrl = manga.mangaUrl!!)
+        libraryViewModel.existState(mangaUrl = manga.mangaUrl!!)
     }
 
     when(uiState) {
@@ -189,7 +189,7 @@ fun MangaScreen(
                                 ) {
                                     IconButton(
                                         onClick = {
-                                            mLibraryViewModel.onLibraryClicked(
+                                            libraryViewModel.onLibraryClicked(
                                                 libraryEntity =
                                                 LibraryEntity(
                                                     id = 0,
@@ -672,5 +672,5 @@ fun ExtendableText(
 @Preview
 @Composable
 fun MangaScreenPreview() {
-    MangaScreen(navController = rememberNavController(), mainViewModel = MainViewModel(), sharedViewModel = hiltViewModel(), historyViewModel = hiltViewModel())
+    MangaScreen(navController = rememberNavController(), mainViewModel = MainViewModel(), sharedViewModel = hiltViewModel(), historyViewModel = hiltViewModel(), libraryViewModel = hiltViewModel())
 }

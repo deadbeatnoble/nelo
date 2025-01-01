@@ -1,27 +1,38 @@
-package com.example.nelo.data.library
+package com.example.nelo.presentation.viewmodels
 
-import android.app.Application
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nelo.data.model.LibraryEntity
+import com.example.nelo.domain.usecases.AddLibraryUseCase
+import com.example.nelo.domain.usecases.DeleteLibraryUseCase
+import com.example.nelo.domain.usecases.ExistLibraryUseCase
+import com.example.nelo.domain.usecases.GetAllLibraryUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class LibraryViewModel(application: Application): AndroidViewModel(application) {
-    private val getAllLibrary: LiveData<List<LibraryEntity>>
-    private val repository: LibraryRepository
+@HiltViewModel
+class LibraryViewModel @Inject constructor(
+    private val getAllLibraryUseCase: GetAllLibraryUseCase,
+    private val addLibraryUseCase: AddLibraryUseCase,
+    private val deleteLibraryUseCase: DeleteLibraryUseCase,
+    private val existLibraryUseCase: ExistLibraryUseCase
+): ViewModel() {
+    private val getAllLibrary: LiveData<List<LibraryEntity>> = getAllLibraryUseCase()
+    //private val repository: LibraryRepositoryImpl
 
-    init {
-        val libraryDao = LibraryDatabase.getDatabase(application).libraryDao()
+    /*init {
+        //val libraryDao = LibraryDatabase.getDatabase(application).libraryDao()
 
-        repository = LibraryRepository(libraryDao)
-        getAllLibrary = repository.getAllLibrary
-    }
+        //repository = LibraryRepositoryImpl(libraryDao)
+    }*/
 
     private var _existsLibraryState = mutableStateOf(value = false)
     val existsLibraryState = _existsLibraryState
@@ -29,9 +40,9 @@ class LibraryViewModel(application: Application): AndroidViewModel(application) 
         _existsLibraryState.value = existLibrary(mangaUrl = mangaUrl)
     }
 
-    fun existLibrary(mangaUrl: String): Boolean = runBlocking {
+    private fun existLibrary(mangaUrl: String): Boolean = runBlocking {
         withContext(Dispatchers.IO) {
-            repository.existLibrary(mangaUrl = mangaUrl)
+            existLibraryUseCase(mangaUrl = mangaUrl)
         }
     }
 
@@ -45,15 +56,15 @@ class LibraryViewModel(application: Application): AndroidViewModel(application) 
         }
     }
 
-    fun addLibrary(libraryEntity: LibraryEntity) {
+    private fun addLibrary(libraryEntity: LibraryEntity) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.addLibrary(libraryEntity = libraryEntity)
+            addLibraryUseCase(libraryEntity = libraryEntity)
         }
     }
 
-    fun deleteLibrary(mangaUrl: String) {
+    private fun deleteLibrary(mangaUrl: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.deleteLibrary(mangaUrl = mangaUrl)
+            deleteLibraryUseCase(mangaUrl = mangaUrl)
         }
     }
 

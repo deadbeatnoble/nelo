@@ -33,13 +33,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.nelo.MainViewModel
-import com.example.nelo.data.library.LibraryViewModel
+import com.example.nelo.presentation.viewmodels.LibraryViewModel
 import com.example.nelo.domain.model.MangaModel
 import com.example.nelo.presentation.navigation.DetailNavScreens
 import com.example.nelo.presentation.navigation.RootNavGraphs
@@ -49,19 +50,19 @@ import com.example.nelo.presentation.navigation.RootNavGraphs
 @Composable
 fun LibraryScreen(
     mainViewModel: MainViewModel,
-    navController: NavHostController
+    navController: NavHostController,
+    libraryViewModel: LibraryViewModel
 ) {
-    val mLibraryViewModel: LibraryViewModel = ViewModelProvider(LocalViewModelStoreOwner.current!!).get(
-        LibraryViewModel::class.java)
+    //val mLibraryViewModel: LibraryViewModel = ViewModelProvider(LocalViewModelStoreOwner.current!!).get(LibraryViewModel::class.java)
 
     val toggleTheme = mainViewModel.toggleTheme.value
-    val library by mLibraryViewModel.mangaLibrary.collectAsState()
+    val library by libraryViewModel.mangaLibrary.collectAsState()
 
     val themeBackgroundColor = if (toggleTheme) Color.White else Color.Black
     val themeTextColor = if (toggleTheme) Color.Black else Color.White
 
     LaunchedEffect(true) {
-        mLibraryViewModel.getLibrary()
+        libraryViewModel.getLibrary()
     }
 
 
@@ -169,5 +170,5 @@ fun LibraryScreen(
 @Preview
 @Composable
 fun LibraryScreenPreview() {
-    LibraryScreen(mainViewModel = MainViewModel(), navController = rememberNavController())
+    LibraryScreen(mainViewModel = MainViewModel(), navController = rememberNavController(), libraryViewModel = hiltViewModel())
 }

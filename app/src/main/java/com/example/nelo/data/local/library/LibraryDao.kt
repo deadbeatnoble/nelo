@@ -1,10 +1,11 @@
-package com.example.nelo.data.library
+package com.example.nelo.data.local.library
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.example.nelo.data.model.LibraryEntity
 
 @Dao
 interface LibraryDao {

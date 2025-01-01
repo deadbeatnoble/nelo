@@ -4,17 +4,25 @@ import android.app.Application
 import android.content.Context
 import com.example.nelo.data.local.history.HistoryDao
 import com.example.nelo.data.local.history.HistoryDatabase
+import com.example.nelo.data.local.library.LibraryDao
+import com.example.nelo.data.local.library.LibraryDatabase
 import com.example.nelo.data.repositories.HistoryRepositoryImpl
 import com.example.nelo.data.remote.scraper.Parser
 import com.example.nelo.data.remote.scraper.WebScraper
+import com.example.nelo.data.repositories.LibraryRepositoryImpl
 import com.example.nelo.data.repositories.MangaRepositoryImpl
 import com.example.nelo.domain.repositories.HistoryRepository
+import com.example.nelo.domain.repositories.LibraryRepository
 import com.example.nelo.domain.repositories.MangaRepository
 import com.example.nelo.domain.usecases.AddHistoryUseCase
+import com.example.nelo.domain.usecases.AddLibraryUseCase
 import com.example.nelo.domain.usecases.ClearHistoryUseCase
 import com.example.nelo.domain.usecases.DeleteHistoryUseCase
+import com.example.nelo.domain.usecases.DeleteLibraryUseCase
 import com.example.nelo.domain.usecases.ExistHistoryUseCase
+import com.example.nelo.domain.usecases.ExistLibraryUseCase
 import com.example.nelo.domain.usecases.GetAllHistoryUseCase
+import com.example.nelo.domain.usecases.GetAllLibraryUseCase
 import com.example.nelo.domain.usecases.GetChapterDetailsUseCase
 import com.example.nelo.domain.usecases.GetFilteredMangasUseCase
 import com.example.nelo.domain.usecases.GetLatestMangasUseCase
@@ -149,5 +157,53 @@ object AppModule {
         historyRepository: HistoryRepository
     ):GetAllHistoryUseCase {
         return GetAllHistoryUseCase(historyRepository = historyRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideLibraryDatabase(context: Context): LibraryDatabase {
+        return LibraryDatabase.getDatabase(context)
+    }
+
+    @Provides
+    fun provideLibraryDao(
+        libraryDatabase: LibraryDatabase
+    ): LibraryDao {
+        return libraryDatabase.libraryDao()
+    }
+
+    @Provides
+    fun provideLibraryRepository(
+        libraryDao: LibraryDao
+    ): LibraryRepository {
+        return LibraryRepositoryImpl(libraryDao = libraryDao)
+    }
+
+    @Provides
+    fun provideAddLibraryRepository(
+        libraryRepository: LibraryRepository
+    ):AddLibraryUseCase {
+        return AddLibraryUseCase(libraryRepository = libraryRepository)
+    }
+
+    @Provides
+    fun provideDeleteLibraryRepository(
+        libraryRepository: LibraryRepository
+    ):DeleteLibraryUseCase {
+        return DeleteLibraryUseCase(libraryRepository = libraryRepository)
+    }
+
+    @Provides
+    fun provideExistLibraryRepository(
+        libraryRepository: LibraryRepository
+    ):ExistLibraryUseCase {
+        return ExistLibraryUseCase(libraryRepository = libraryRepository)
+    }
+
+    @Provides
+    fun provideGetAllLibraryRepository(
+        libraryRepository: LibraryRepository
+    ):GetAllLibraryUseCase {
+        return GetAllLibraryUseCase(libraryRepository = libraryRepository)
     }
 }

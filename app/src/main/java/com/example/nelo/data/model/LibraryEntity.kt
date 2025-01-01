@@ -1,4 +1,4 @@
-package com.example.nelo.data.library
+package com.example.nelo.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

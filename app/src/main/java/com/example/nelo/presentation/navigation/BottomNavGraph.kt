@@ -10,6 +10,7 @@ import com.example.nelo.presentation.viewmodels.HistoryViewModel
 import com.example.nelo.presentation.screen.browse.BrowseScreen
 import com.example.nelo.presentation.screen.history.HistoryScreen
 import com.example.nelo.presentation.screen.library.LibraryScreen
+import com.example.nelo.presentation.viewmodels.LibraryViewModel
 import com.example.nelo.presentation.viewmodels.SharedViewModel
 
 @Composable
@@ -17,7 +18,8 @@ fun BottomNavGraph(
     mainViewModel: MainViewModel,
     navController: NavHostController,
     sharedViewModel: SharedViewModel = hiltViewModel(),
-    historyViewModel: HistoryViewModel = hiltViewModel()
+    historyViewModel: HistoryViewModel = hiltViewModel(),
+    libraryViewModel: LibraryViewModel = hiltViewModel()
 ) {
     NavHost(
         navController = navController,
@@ -29,7 +31,8 @@ fun BottomNavGraph(
         ) {
             LibraryScreen(
                 mainViewModel = mainViewModel,
-                navController = navController
+                navController = navController,
+                libraryViewModel = libraryViewModel
             )
         }
         composable(
@@ -54,7 +57,8 @@ fun BottomNavGraph(
             navController = navController,
             mainViewModel = mainViewModel,
             sharedViewModel = sharedViewModel,
-            historyViewModel = historyViewModel
+            historyViewModel = historyViewModel,
+            libraryViewModel = libraryViewModel
         )
     }
 }

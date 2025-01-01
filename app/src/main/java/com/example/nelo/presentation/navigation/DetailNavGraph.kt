@@ -10,13 +10,15 @@ import com.example.nelo.MainViewModel
 import com.example.nelo.presentation.viewmodels.HistoryViewModel
 import com.example.nelo.presentation.screen.chapterview.PageListView
 import com.example.nelo.presentation.screen.mangaview.MangaScreen
+import com.example.nelo.presentation.viewmodels.LibraryViewModel
 import com.example.nelo.presentation.viewmodels.SharedViewModel
 
 fun NavGraphBuilder.detailNavGraph(
     navController: NavHostController,
     mainViewModel: MainViewModel,
     sharedViewModel: SharedViewModel,
-    historyViewModel: HistoryViewModel
+    historyViewModel: HistoryViewModel,
+    libraryViewModel: LibraryViewModel
 ) {
     navigation(
         route = RootNavGraphs.DetailGraph.route,
@@ -29,7 +31,8 @@ fun NavGraphBuilder.detailNavGraph(
                 navController = navController,
                 mainViewModel = mainViewModel,
                 sharedViewModel = sharedViewModel,
-                historyViewModel = historyViewModel
+                historyViewModel = historyViewModel,
+                libraryViewModel = libraryViewModel
             )
         }
 
