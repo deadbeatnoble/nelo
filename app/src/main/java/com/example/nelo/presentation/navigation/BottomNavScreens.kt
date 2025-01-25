@@ -5,21 +5,25 @@ import com.example.nelo.R
 sealed class BottomNavScreens(
     val route: String,
     val title: String,
-    val icon: Int
+    val selectedIcon: Int,
+    val unselectedIcon: Int
 ) {
     object Library: BottomNavScreens(
         route = "library",
         title = "Library",
-        icon = R.drawable.library
+        selectedIcon = R.drawable.selected_library,
+        unselectedIcon = R.drawable.unselected_library
     )
     object Browse: BottomNavScreens(
         route = "browse",
         title = "Browse",
-        icon = R.drawable.browse
+        selectedIcon = R.drawable.selected_home,
+        unselectedIcon = R.drawable.unselected_home
     )
     object History: BottomNavScreens(
         route = "history",
         title = "History",
-        icon = R.drawable.history
+        selectedIcon = R.drawable.selected_history,
+        unselectedIcon = R.drawable.unselected_history
     )
 }
