@@ -1,6 +1,7 @@
 package com.example.nelo.presentation.screen.browse
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.nelo.domain.model.FilterModel
 import com.example.nelo.domain.model.MangaModel
@@ -27,6 +28,8 @@ class BrowseViewModel @Inject constructor(
     private val _feedUiState = MutableStateFlow<UiState<List<MangaModel>>>(UiState.Loading)
     val feedUiState: StateFlow<UiState<List<MangaModel>>> = _feedUiState
 
+    var keyword = mutableStateOf("")
+    var selectedKeyword = mutableStateOf("Everything")
     private var currentPage: Int = 1
     private var currentCategory: String = "popular"
     var filter = FilterModel(emptyList(), emptyList(), "", "", "", "")

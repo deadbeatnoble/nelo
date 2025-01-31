@@ -2,6 +2,7 @@ package com.example.nelo.presentation.screen.browse
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,7 +32,6 @@ import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -49,24 +49,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -74,7 +72,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -106,87 +103,58 @@ fun BrowseScreen(
     mainViewModel: MainViewModel,
     browseViewModel: BrowseViewModel = hiltViewModel()
 ) {
-    //val feedUiState by sharedViewModel.feedUiState.collectAsState()
-    val feedUiState by browseViewModel.feedUiState.collectAsState()
 
+    val keyboardController = LocalSoftwareKeyboardController.current
 
-
-
-
-    val gridState = rememberLazyGridState()
-    val scope = rememberCoroutineScope()
-
-    val isEndReached = remember {
-        derivedStateOf {
-            (gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) + 1 >
-                    gridState.layoutInfo.totalItemsCount - 2
-        }
-    }
-
-    val selectedColor = Color.Red
-
-    val tabs = listOf(
-        "Popular",
-        "Latest",
-        "Filter"
-    )
-
-    val isLoading = mainViewModel.isLoading.value
-    val feedResponse = mainViewModel.feedResponse.value
-    val feedResponseError = mainViewModel.feedResponseError.value
-    val onUpdate = mainViewModel.onUpdate.value
-    val toggleTheme = mainViewModel.toggleTheme.value
-    val theme = if (toggleTheme) R.drawable.light else R.drawable.dark
-    val selectedTab = mainViewModel.selectedTab.value
-    val keyword = mainViewModel.keyword
-    val selectedKeyword = mainViewModel.selectedKeyword
-
-    val themeBackgroundColor = if (toggleTheme) Color.White else Color.Black
-    val themeTextColor = if (toggleTheme) Color.Black else Color.White
-
-    val showGenres = remember {
-        mutableStateOf(false)
-    }
-
-    val bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
-    val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
-
-    val keyTypesExpanded = remember {
-        mutableStateOf(false)
-    }
     val keyTypes = listOf(
         "Everything",
         "Name title",
         "Alternative name",
         "Author"
     )
-    //val selectedKeyword = remember { mutableStateOf(keyTypes[0]) }
-
-    val orderByExpanded = remember {
-        mutableStateOf(false)
-    }
     val orderBy = listOf(
         "Latest Updates",
         "Top view",
         "New Manga",
         "A-Z"
     )
-    val selectedOrderBy = remember {
-        mutableStateOf(orderBy[0])
-    }
-
-    val statusExpanded = remember {
-        mutableStateOf(false)
-    }
     val status = listOf(
         "Ongoing and Complete",
         "Ongoing",
         "Completed"
     )
+    val tabs = listOf(
+        "Popular",
+        "Latest",
+        "Filter"
+    )
+
+    val feedUiState by browseViewModel.feedUiState.collectAsState()
+    val keyword = browseViewModel.keyword
+    val selectedKeyword = browseViewModel.selectedKeyword
+
+    val gridState = rememberLazyGridState()
+    val scope = rememberCoroutineScope()
+    val showGenres = remember {
+        mutableStateOf(false)
+    }
+    val bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
+    val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
+    val keyTypesExpanded = remember {
+        mutableStateOf(false)
+    }
+    val orderByExpanded = remember {
+        mutableStateOf(false)
+    }
+    val selectedOrderBy = remember {
+        mutableStateOf(orderBy[0])
+    }
+    val statusExpanded = remember {
+        mutableStateOf(false)
+    }
     val selectedStatus = remember {
         mutableStateOf(status[0])
     }
-
     val excluded = remember {
         mutableStateListOf<Int>()
     }
@@ -194,16 +162,35 @@ fun BrowseScreen(
         mutableStateListOf<Int>()
     }
 
+    val themeBackgroundColor = Color.White
+    val themeTextColor = Color.Black
+
+    /*
+    val toggleTheme = mainViewModel.toggleTheme.value
+    val feedResponseError = mainViewModel.feedResponseError.value
+    val onUpdate = mainViewModel.onUpdate.value
+    val isEndReached = remember {
+        derivedStateOf {
+            (gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) + 1 >
+                    gridState.layoutInfo.totalItemsCount - 2
+        }
+    }
+    //val feedUiState by sharedViewModel.feedUiState.collectAsState()
+    //val selectedColor = Color.Red
+    //val theme = if (toggleTheme) R.drawable.light else R.drawable.dark
+    //val selectedTab = mainViewModel.selectedTab.value
+    //val isLoading = mainViewModel.isLoading.value
+    //val feedResponse = mainViewModel.feedResponse.value
+    //val selectedKeyword = remember { mutableStateOf(keyTypes[0]) }
     //val keyword = remember { mutableStateOf("") }
     val searchExpanded = remember {
         mutableStateOf(false)
     }
-
     LaunchedEffect(true) {
         if (keyword.value.isNotEmpty()) {
             searchExpanded.value = true
         }
-    }
+    }*/
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
@@ -662,8 +649,9 @@ fun BrowseScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(themeBackgroundColor)
+                .padding(start = 16.dp, end = 16.dp, top = 24.dp)
         ){
-            Column (
+            /*Column (
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(themeTextColor)
@@ -925,7 +913,104 @@ fun BrowseScreen(
                         )
                     }
                 }
-            }
+            }*/
+            MySearchBar(
+                text = keyword.value,
+                onTextChange = {
+                    keyword.value = it
+                },
+                onCloseClicked = {
+                    keyword.value = ""
+                },
+                onSearchClicked = {
+                    keyboardController?.hide()
+
+                    mainViewModel._currentPage.value = 1
+                    val url = buildString {
+                        append("https://manganato.com/advanced_search?s=all")
+
+                        if(include.isNotEmpty()) {
+                            append("&g_i=_${include.joinToString("_")}_")
+                        }
+
+                        if(excluded.isNotEmpty()) {
+                            append("&g_e=_${excluded.joinToString("_")}_")
+                        }
+
+                        when(selectedStatus.value) {
+                            status[0] -> append("")
+                            status[1] -> append("&sts=ongoing")
+                            status[2] -> append("&sts=completed")
+                        }
+
+                        when(selectedOrderBy.value) {
+                            orderBy[0] -> append("")
+                            orderBy[1] -> append("&orby=topview")
+                            orderBy[2] -> append("&orby=newest")
+                            orderBy[3] -> append("&orby=az")
+                        }
+
+                        append("&page=${mainViewModel._currentPage.value}")
+
+                        if (keyword.value.isNotEmpty()) {
+                            when(selectedKeyword.value) {
+                                keyTypes[0] -> append("")
+                                keyTypes[1] -> append("&keyt=title")
+                                keyTypes[2] -> append("&keyt=alternative")
+                                keyTypes[3] -> append("&keyt=author")
+                            }
+
+                            append("&keyw=${keyword.value}")
+                        }
+                    }
+                    mainViewModel.advancedSearchUrl.value = url
+                    mainViewModel._selectedTab.value = tabs[2]
+                    mainViewModel.feedChange.value = true
+                    mainViewModel._hasNextPage.value = true
+                    mainViewModel._feedResponse.value.clear()
+                    //mainViewModel.getAdvancedSearchFeed()
+
+
+                    /////////////////////////////
+                    browseViewModel.filter = FilterModel(
+                        include = include.toList(),
+                        exclude = excluded.toList(),
+                        status = selectedStatus.value,
+                        orderBy = selectedOrderBy.value,
+                        keyType = selectedKeyword.value,
+                        keyWord = keyword.value
+                    )
+                    browseViewModel.switchCategory(category = "filter")
+                    /////////////////////////////
+                },
+                onFilterClicked = {
+                    scope.launch {
+                        if (bottomSheetState.isExpanded) {
+                            bottomSheetState.collapse()
+                        } else {
+                            bottomSheetState.expand()
+                        }
+                    }
+                }
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            FeedTab(
+                selectedTab = mainViewModel.selectedTab,
+                onPopularSelected = {
+                    mainViewModel.updateSelectedTab(tabs[0])
+
+                    browseViewModel.switchCategory(category = "Popular")
+                },
+                onLatestSelected = {
+                    mainViewModel.updateSelectedTab(tabs[1])
+
+                    browseViewModel.switchCategory(category = "Latest")
+                }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             when(val state = feedUiState) {
                 is UiState.Loading -> {
@@ -936,17 +1021,17 @@ fun BrowseScreen(
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(3),
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(6.dp),
+                            .fillMaxWidth(),
                         state = gridState,
                         contentPadding = PaddingValues(bottom = 50.dp)
                     ) {
                         items(mangaList) {
-                            onUpdate
                             Box(
                                 modifier = Modifier
                                     .aspectRatio(225f / 337f)
                                     .padding(6.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .border(2.dp, Color.Black, RoundedCornerShape(16.dp))
                                     .clickable {
                                         if (navController.currentBackStackEntry?.destination?.route != DetailNavScreens.MangaScreen.route) {
                                             mainViewModel._mangaDetail.value =
@@ -985,24 +1070,20 @@ fun BrowseScreen(
 
                                 Box(
                                     modifier = Modifier
-                                        .fillMaxSize()
-                                        .drawWithCache {
-                                            val gradient = Brush.verticalGradient(
-                                                colors = listOf(
+                                        .fillMaxWidth()
+                                        .fillMaxHeight(0.45f)
+                                        .align(Alignment.BottomCenter)
+                                        .background(
+                                            brush = Brush.verticalGradient(
+                                                listOf(
                                                     Color.Transparent,
-                                                    Color.Black.copy(alpha = 0.6f)
+                                                    Color.White
                                                 ),
-                                                startY = (size.height / 4) + (size.height / 2),
-                                                endY = size.height
+                                                startY = 0f,
+                                                endY = Float.POSITIVE_INFINITY,
+                                                tileMode = TileMode.Decal
                                             )
-                                            onDrawWithContent {
-                                                drawContent()
-                                                drawRect(
-                                                    gradient,
-                                                    blendMode = BlendMode.Multiply
-                                                )
-                                            }
-                                        }
+                                        )
                                 )
 
                                 Box(
@@ -1034,7 +1115,7 @@ fun BrowseScreen(
 
                                 Text(
                                     text = it.title ?: "Unknown",
-                                    color = Color.White,
+                                    color = Color.Black,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     lineHeight = 13.sp,
@@ -1070,6 +1151,7 @@ fun BrowseScreen(
                     }
                 }
                 is UiState.Error -> {
+                    val errorMessage = (feedUiState as UiState.Error).message
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -1081,7 +1163,7 @@ fun BrowseScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = feedResponseError,
+                                text = errorMessage,
                                 fontSize = 18.sp,
                                 color = themeTextColor
                             )
@@ -1108,6 +1190,173 @@ fun BrowseScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun FeedTab(
+    selectedTab: MutableState<String>,
+    onPopularSelected: () -> Unit,
+    onLatestSelected: () -> Unit
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .border(1.dp, Color.Black, RoundedCornerShape(12.dp))
+                .background(Color.LightGray.copy(alpha = 0.4f))
+                .padding(horizontal = 20.dp, vertical = 6.dp)
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(
+                        1.dp,
+                        if (selectedTab.value == "Popular") Color.Black else Color.Transparent,
+                        RoundedCornerShape(12.dp)
+                    )
+                    .background(color = if (selectedTab.value == "Popular") colorResource(id = R.color.orange_bg) else Color.Transparent)
+                    .clickable {
+                        onPopularSelected()
+                    }
+                    .padding(horizontal = 20.dp, vertical = 4.dp)
+            ) {
+                Image (
+                    painter = painterResource(id = R.drawable.popular_icon),
+                    contentDescription = "popular feed icon",
+                    modifier = Modifier
+                        .size(28.dp)
+                )
+            }
+
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(
+                        1.dp,
+                        if (selectedTab.value == "Latest") Color.Black else Color.Transparent,
+                        RoundedCornerShape(12.dp)
+                    )
+                    .background(color = if (selectedTab.value == "Latest") colorResource(id = R.color.orange_bg) else Color.Transparent)
+                    .clickable {
+                        onLatestSelected()
+                    }
+                    .padding(horizontal = 20.dp, vertical = 4.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.latest_icon),
+                    contentDescription = "latest feed icon",
+                    modifier = Modifier
+                        .size(28.dp)
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MySearchBar(
+    modifier : Modifier = Modifier,
+    text : String,
+    onTextChange : (String) -> Unit,
+    onCloseClicked : () -> Unit,
+    onSearchClicked : (String) -> Unit,
+    onFilterClicked : () -> Unit
+){
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(48.dp))
+            .border(2.dp, Color.Black, RoundedCornerShape(48.dp))
+    ) {
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp),
+            value = text,
+            onValueChange = {
+                onTextChange(it)
+            },
+            placeholder = {
+                Text(
+                    text = "Search...",
+                    color = Color.LightGray,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Normal,
+                )
+            },
+            leadingIcon = {
+                androidx.compose.material3.IconButton(onClick = { }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.search_icon),
+                        contentDescription = null,
+                        tint = Color.Black,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            },
+            trailingIcon = {
+                androidx.compose.material3.IconButton(onClick = {
+                    if (text.isNotBlank()) {
+                        onCloseClicked()
+                    } else {
+                        onFilterClicked()
+                    }
+                }) {
+                    if (text.isNotBlank()) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = null,
+                            tint = Color.Black,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(id = R.drawable.filter_icon),
+                            contentDescription = null,
+                            tint = Color.Black,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                }
+            },
+            keyboardActions = KeyboardActions(
+                onDone = {  onSearchClicked.invoke(text) }
+            ),
+            singleLine = true,
+            textStyle = TextStyle(
+                color = Color.Black,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+
+                ),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                containerColor = Color.Transparent,
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent,
+                cursorColor = Color.Black
+
+            ),
+        )
+        Divider(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(horizontal = 70.dp)
+                .width(1.dp),
+            color = Color.Black,
+            thickness = 48.dp
+        )
+
     }
 }
 
