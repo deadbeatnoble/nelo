@@ -2,6 +2,9 @@ package com.example.nelo.presentation.screen.browse
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -26,6 +30,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.BottomSheetScaffold
@@ -39,7 +44,6 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -73,6 +77,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -80,7 +85,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.nelo.MainViewModel
 import com.example.nelo.R
@@ -91,6 +95,7 @@ import com.example.nelo.presentation.navigation.DetailNavScreens
 import com.example.nelo.presentation.navigation.RootNavGraphs
 import com.example.nelo.util.Genres
 import com.example.nelo.util.UiState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @SuppressLint("MutableCollectionMutableState", "UnrememberedMutableState")
@@ -1014,185 +1019,162 @@ fun BrowseScreen(
 
             when(val state = feedUiState) {
                 is UiState.Loading -> {
-                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(50.dp))
+                    LoadingDialog()
                 }
                 is UiState.Success -> {
                     val mangaList = state.data
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(3),
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        state = gridState,
-                        contentPadding = PaddingValues(bottom = 50.dp)
-                    ) {
-                        items(mangaList) {
-                            Box(
-                                modifier = Modifier
-                                    .aspectRatio(225f / 337f)
-                                    .padding(6.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .border(2.dp, Color.Black, RoundedCornerShape(16.dp))
-                                    .clickable {
-                                        if (navController.currentBackStackEntry?.destination?.route != DetailNavScreens.MangaScreen.route) {
-                                            mainViewModel._mangaDetail.value =
-                                                MangaModel(
-                                                    title = it.title,
-                                                    thumbnail = it.thumbnail,
-                                                    authors = emptyList(),
-                                                    genres = emptyList(),
-                                                    status = null,
-                                                    updatedAt = null,
-                                                    description = null,
+                    if (mangaList.isEmpty()) {
+                        Spacer(modifier = Modifier.height(50.dp))
+                        EmptyDialog()
+                    } else {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(3),
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            state = gridState,
+                            contentPadding = PaddingValues(bottom = 50.dp)
+                        ) {
+                            items(mangaList) {
+                                Box(
+                                    modifier = Modifier
+                                        .aspectRatio(225f / 337f)
+                                        .padding(6.dp)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .border(2.dp, Color.Black, RoundedCornerShape(16.dp))
+                                        .clickable {
+                                            if (navController.currentBackStackEntry?.destination?.route != DetailNavScreens.MangaScreen.route) {
+                                                mainViewModel._mangaDetail.value =
+                                                    MangaModel(
+                                                        title = it.title,
+                                                        thumbnail = it.thumbnail,
+                                                        authors = emptyList(),
+                                                        genres = emptyList(),
+                                                        status = null,
+                                                        updatedAt = null,
+                                                        description = null,
+                                                        view = null,
+                                                        rating = it.rating,
+                                                        mangaUrl = it.mangaUrl,
+                                                        chapterList = emptyList()
+                                                    )
+                                                mainViewModel._chapterDetail.value = ChapterModel(
+                                                    title = null,
                                                     view = null,
-                                                    rating = it.rating,
-                                                    mangaUrl = it.mangaUrl,
-                                                    chapterList = emptyList()
+                                                    uploadedAt = null,
+                                                    chapterUrl = null,
+                                                    pages = emptyList()
                                                 )
-                                            mainViewModel._chapterDetail.value = ChapterModel(
-                                                title = null,
-                                                view = null,
-                                                uploadedAt = null,
-                                                chapterUrl = null,
-                                                pages = emptyList()
-                                            )
-                                            //mainViewModel.getManga()
-                                            navController.navigate(RootNavGraphs.DetailGraph.route)
+                                                //mainViewModel.getManga()
+                                                navController.navigate(RootNavGraphs.DetailGraph.route)
+                                            }
                                         }
-                                    }
-                            ) {
-                                AsyncImage(
-                                    model = it.thumbnail,
-                                    contentDescription = "Manga Cover",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                )
-
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .fillMaxHeight(0.45f)
-                                        .align(Alignment.BottomCenter)
-                                        .background(
-                                            brush = Brush.verticalGradient(
-                                                listOf(
-                                                    Color.Transparent,
-                                                    Color.White
-                                                ),
-                                                startY = 0f,
-                                                endY = Float.POSITIVE_INFINITY,
-                                                tileMode = TileMode.Decal
-                                            )
-                                        )
-                                )
-
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth(0.35f)
-                                        .background(Color.Black.copy(alpha = 0.6f))
-                                        .align(Alignment.TopEnd)
                                 ) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically,
+                                    AsyncImage(
+                                        model = it.thumbnail,
+                                        contentDescription = "Manga Cover",
+                                        contentScale = ContentScale.Crop,
                                         modifier = Modifier
-                                            .padding(horizontal = 3.dp)
+                                            .fillMaxSize()
+                                    )
+
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .fillMaxHeight(0.45f)
+                                            .align(Alignment.BottomCenter)
+                                            .background(
+                                                brush = Brush.verticalGradient(
+                                                    listOf(
+                                                        Color.Transparent,
+                                                        Color.White
+                                                    ),
+                                                    startY = 0f,
+                                                    endY = Float.POSITIVE_INFINITY,
+                                                    tileMode = TileMode.Decal
+                                                )
+                                            )
+                                    )
+
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth(0.35f)
+                                            .background(Color.Black.copy(alpha = 0.6f))
+                                            .align(Alignment.TopEnd)
                                     ) {
-                                        Text(
-                                            text = it.rating ?: "?",
-                                            color = Color.White,
-                                            fontSize = 13.sp,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        Icon(
-                                            imageVector = Icons.Default.Star,
-                                            contentDescription = "rate",
-                                            tint = Color.Yellow
-                                        )
-                                    }
-                                }
-
-                                Text(
-                                    text = it.title ?: "Unknown",
-                                    color = Color.Black,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    lineHeight = 13.sp,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier
-                                        .align(Alignment.BottomStart)
-                                        .padding(6.dp),
-                                )
-                            }
-                        }
-
-                        item {
-                            var isFetching by remember { mutableStateOf(false) }
-
-                            LaunchedEffect((feedUiState as? UiState.Success<List<MangaModel>>)?.data?.size) {
-                                if (!isFetching && feedUiState !is UiState.Loading) {
-                                    isFetching = true
-                                    Log.e("TESTING", "yup its the end loading the 2nd one")
-                                    browseViewModel.loadMangas()
-                                    isFetching = false
-                                }
-                            }
-                            /*LaunchedEffect(true) {
-                                snapshotFlow { (feedUiState as UiState.Success<List<MangaModel>>).data.size }
-                                    .collect {
-                                        if (feedUiState !is UiState.Loading) {
-                                            browseViewModel.getPopularMangas()
+                                        Row(
+                                            horizontalArrangement = Arrangement.Center,
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier
+                                                .padding(horizontal = 3.dp)
+                                        ) {
+                                            Text(
+                                                text = it.rating ?: "?",
+                                                color = Color.White,
+                                                fontSize = 13.sp,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                            Icon(
+                                                imageVector = Icons.Default.Star,
+                                                contentDescription = "rate",
+                                                tint = Color.Yellow
+                                            )
                                         }
                                     }
-                            }*/
+
+                                    Text(
+                                        text = it.title ?: "Unknown",
+                                        color = Color.Black,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        lineHeight = 13.sp,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier
+                                            .align(Alignment.BottomStart)
+                                            .padding(6.dp),
+                                    )
+                                }
+                            }
+
+                            item {
+                                var isFetching by remember { mutableStateOf(false) }
+
+                                LaunchedEffect((feedUiState as? UiState.Success<List<MangaModel>>)?.data?.size) {
+                                    if (!isFetching && feedUiState !is UiState.Loading) {
+                                        isFetching = true
+                                        Log.e("TESTING", "yup its the end loading the 2nd one")
+                                        browseViewModel.loadMangas()
+                                        isFetching = false
+                                    }
+                                }
+                                /*LaunchedEffect(true) {
+                                    snapshotFlow { (feedUiState as UiState.Success<List<MangaModel>>).data.size }
+                                        .collect {
+                                            if (feedUiState !is UiState.Loading) {
+                                                browseViewModel.getPopularMangas()
+                                            }
+                                        }
+                                }*/
+                            }
                         }
                     }
                 }
                 is UiState.Error -> {
                     val errorMessage = (feedUiState as UiState.Error).message
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(themeBackgroundColor)
-                            .padding(32.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = errorMessage,
-                                fontSize = 18.sp,
-                                color = themeTextColor
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Button(
-                                onClick = {
-
-                                    //////////////////////
-                                    browseViewModel.loadMangas()
-                                    //sharedViewModel.getPopularMangas(page = mainViewModel._currentPage.value)
-                                    //////////////////////
-
-
-
-                                    //mainViewModel.getFeed()
-                                }
-                            ) {
-                                Text(
-                                    text = "Retry"
-                                )
-                            }
+                    Spacer(modifier = Modifier.height(50.dp))
+                    ErrorDialog(
+                        errorMessage = errorMessage,
+                        onRetryClicked = {
+                            browseViewModel.loadMangas()
                         }
-                    }
+                    )
                 }
             }
         }
     }
 }
-
 @Composable
 fun FeedTab(
     selectedTab: MutableState<String>,
@@ -1414,12 +1396,164 @@ fun TripleCheckBox(
     }
 }
 
+@Composable
+fun ErrorDialog(
+    errorMessage: String = "Sorry, Something Went Wrong!",
+    onRetryClicked: () -> Unit = {}
+) {
+    Column(
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .border(1.dp, Color.Black, RoundedCornerShape(24.dp))
+            .background(Color.LightGray.copy(alpha = 0.4f))
+            .padding(end = 40.dp, start = 40.dp, top = 32.dp, bottom = 40.dp)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.error_icon),
+            contentDescription = "error icon",
+            modifier = Modifier
+                .size(150.dp)
+        )
+
+        Text(
+            text = errorMessage,
+            fontSize = 20.sp,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            color = Color.Black,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(150.dp))
+
+        Text(
+            text = "Retry",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.Black,
+            modifier = Modifier
+                .clickable {
+                    onRetryClicked()
+                }
+        )
+    }
+}
+
+@Composable
+fun BouncingDotsLoading() {
+    val dotCount = 4
+    val dotSize = 12.dp
+    val dotSpacing = 8.dp
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        (0 until dotCount).forEach { index ->
+            val yOffset = remember { Animatable(0f) }
+
+            LaunchedEffect(Unit) {
+                delay(index * 150L)
+                while (true) {
+                    yOffset.animateTo(
+                        targetValue = -10f,
+                        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
+                    )
+                    yOffset.animateTo(
+                        targetValue = 0f,
+                        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
+                    )
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(dotSize)
+                    .offset(y = yOffset.value.dp)
+                    .background(Color.Black, shape = CircleShape)
+            )
+
+            if (index < dotCount - 1) {
+                Spacer(modifier = Modifier.width(dotSpacing))
+            }
+        }
+    }
+}
+
+@Composable
+fun LoadingDialog() {
+    Column(
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .border(1.dp, Color.Black, RoundedCornerShape(24.dp))
+            .background(Color.LightGray.copy(alpha = 0.4f))
+            .padding(end = 40.dp, start = 40.dp, top = 32.dp, bottom = 40.dp)
+    ) {
+        Spacer(modifier = Modifier.height(130.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            BouncingDotsLoading()
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = "Loading",
+            fontSize = 20.sp,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            color = Color.Black,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(200.dp))
+
+    }
+}
+
+@Composable
+fun EmptyDialog() {
+    Column(
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .border(1.dp, Color.Black, RoundedCornerShape(24.dp))
+            .background(Color.LightGray.copy(alpha = 0.4f))
+            .padding(end = 40.dp, start = 40.dp, top = 32.dp, bottom = 40.dp)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.empty_icon),
+            contentDescription = "empty icon",
+            modifier = Modifier
+                .size(150.dp)
+        )
+        Text(
+            text = "Sorry, Couldn't Find Anything!",
+            fontSize = 20.sp,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            color = Color.Black,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(200.dp))
+
+    }
+}
+
+
 @SuppressLint("MutableCollectionMutableState")
 @Preview
 @Composable
 fun BrowseScreenPreview() {
-    BrowseScreen(
-        navController = rememberNavController(),
-        mainViewModel = MainViewModel()
-    )
+    LoadingDialog()
 }
