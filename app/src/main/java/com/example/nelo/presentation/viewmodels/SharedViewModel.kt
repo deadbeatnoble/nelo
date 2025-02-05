@@ -33,6 +33,8 @@ class SharedViewModel @Inject constructor(
     private val _nextChapterDetails = MutableStateFlow(ChapterModel(title = null, view = null, uploadedAt = null, chapterUrl = null, pages = emptyList()))
     val nextChapterDetails: StateFlow<ChapterModel> = _nextChapterDetails
 
+    var mangaUrl = ""
+
     //methods
 
     fun getMangaDetails(mangaUrl: String) {
@@ -52,6 +54,7 @@ class SharedViewModel @Inject constructor(
 
     fun getChapterDetails(chapterUrl: String, chapterTitle: String) {
         CoroutineScope(Dispatchers.IO).launch {
+            Log.e("TEST", "ChapterUiState is Launching")
             if (mangaDetailsUiState.value is UiState.Success<MangaModel>){
                 val result = getChapterDetailsUseCase.invoke(
                     chapterUrl = chapterUrl,
@@ -68,9 +71,13 @@ class SharedViewModel @Inject constructor(
                     _nextChapterDetails.value = getNextChapterDetails()
                     Log.e("TEST","Next Chapter is Successful -> " + _nextChapterDetails.value.toString())
                 } else {
+                    Log.e("TEST", "ChapterUiState is Successful -> " + UiState.Error(result.exceptionOrNull()?.message.toString()).message.toString())
                     _chapterDetailsUiState.value =
                         UiState.Error(result.exceptionOrNull()?.message ?: "An error occurred")
                 }
+            } else {
+                getMangaDetails(mangaUrl = mangaUrl)
+                Log.e("TEST", "ChapterUiState has failed")
             }
         }
     }

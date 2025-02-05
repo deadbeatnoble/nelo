@@ -139,428 +139,6 @@ fun MangaScreen(
                 historyViewModel = historyViewModel,
                 authors = authors
             )
-            /*LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(themeBackgroundColor)
-            ) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(266.dp)
-                    ) {
-                        AsyncImage(
-                            model = mangaDetail.thumbnail,
-                            contentDescription = "Background cover art image",
-                            contentScale = ContentScale.Crop,
-                            alignment = Alignment.TopCenter,
-                            colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply {
-                                setToSaturation(
-                                    0f
-                                )
-                            }),
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .drawWithCache {
-                                    val gradient = Brush.verticalGradient(
-                                        colors = listOf(
-                                            Color.Transparent,
-                                            themeBackgroundColor.copy(alpha = 1f)
-                                        )
-                                    )
-                                    onDrawWithContent {
-                                        drawContent()
-                                        drawRect(gradient)
-                                    }
-                                }
-                        )
-
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                IconButton(onClick = {
-                                    navController.popBackStack()
-                                }) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.backarrow),
-                                        contentDescription = "Navigate back",
-                                        tint = themeTextColor,
-                                        modifier = Modifier
-                                            .size(25.dp)
-                                    )
-                                }
-
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth(0.3f),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceAround
-                                ) {
-                                    IconButton(
-                                        onClick = {
-                                            libraryViewModel.onLibraryClicked(
-                                                libraryEntity =
-                                                LibraryEntity(
-                                                    id = 0,
-                                                    mangaTitle = mangaDetail.title!!,
-                                                    mangaThumbnail = mangaDetail.thumbnail!!,
-                                                    mangaUrl = mangaDetail.mangaUrl!!
-                                                )
-                                            )
-                                        }
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = heart),
-                                            contentDescription = "Add to favorite",
-                                            tint = colorResource(id = R.color.red),
-                                            modifier = Modifier
-                                                .size(25.dp)
-                                        )
-                                    }
-
-                                    IconButton(onClick = {
-                                        mainViewModel._toggleTheme.value = !toggleTheme
-                                    }) {
-                                        Icon(
-                                            painter = painterResource(id = theme),
-                                            contentDescription = "Toggle Night/Dark mode",
-                                            tint = colorResource(R.color.orange),
-                                            modifier = if (toggleTheme) {
-                                                Modifier
-                                                    .size(25.dp)
-                                            } else {
-                                                Modifier
-                                                    .size(25.dp)
-                                                    .clip(RoundedCornerShape(50.dp))
-                                                    .background(color = colorResource(R.color.dark_blue))
-                                                    .padding(2.dp)
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-
-                            Spacer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(32.dp)
-                            )
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(175.dp)
-                                    .padding(horizontal = 16.dp)
-                            ) {
-                                AsyncImage(
-                                    model = mangaDetail.thumbnail,
-                                    contentDescription = "Thumbnail",
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier
-                                        .width(130.dp)
-                                        .fillMaxHeight()
-                                        .clip(RoundedCornerShape(8.dp))
-                                )
-
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.SpaceEvenly
-                                ) {
-
-                                    AutoResizableText(
-                                        customText = mangaDetail.title ?: "Unknown",
-                                        customFontSize = 18.sp,
-                                        customFontWeight = FontWeight.SemiBold,
-                                        themeTextColor = themeTextColor,
-                                        customMaxLines = 4
-                                    )
-
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                    ) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth(),
-                                            verticalAlignment = Alignment.Top
-                                        ) {
-                                            Icon(
-                                                painter = painterResource(id = people),
-                                                contentDescription = "Author icon",
-                                                tint = themeTextColor.copy(alpha = 0.6f),
-                                                modifier = Modifier
-                                                    .size(18.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            AutoResizableText(
-                                                customText = if(authors.isEmpty()) "Updating..." else authors.joinToString(" , "),
-                                                customFontSize = 14.sp,
-                                                customFontWeight = FontWeight.Normal,
-                                                themeTextColor = themeTextColor.copy(alpha = 0.6f),
-                                                customMaxLines = 3,
-                                                modifier = Modifier
-                                                    .clickable {
-                                                        if (authors.isNotEmpty()) {
-                                                            navController.navigate(BottomNavScreens.Browse.route) {
-                                                                popUpTo(navController.graph.findStartDestination().id)
-                                                                launchSingleTop = true
-                                                            }
-
-                                                            mainViewModel._selectedTab.value =
-                                                                "Filter"
-                                                            mainViewModel.feedChange.value = true
-                                                            mainViewModel._feedResponse.value.clear()
-                                                            mainViewModel._hasNextPage.value = true
-                                                            mainViewModel._currentPage.value = 1
-
-                                                            mainViewModel.keyword.value =
-                                                                authors.joinToString(", ")
-                                                            mainViewModel.selectedKeyword.value =
-                                                                "Author"
-
-                                                            authors.forEachIndexed { index, author ->
-                                                                val updatedAuthor =
-                                                                    author.replace(" ", "_")
-                                                                authors[index] = updatedAuthor
-                                                            }
-
-
-                                                            val url =
-                                                                "https://manganato.com/advanced_search?s=all&page=${mainViewModel._currentPage.value}&keyt=author&keyw=${
-                                                                    authors.joinToString("_")
-                                                                }"
-
-                                                            mainViewModel.advancedSearchUrl.value =
-                                                                url
-                                                            mainViewModel.getAdvancedSearchFeed()
-                                                        }
-                                                    }
-                                            )
-                                        }
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth(),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Icon(
-                                                painter = painterResource(id = status),
-                                                contentDescription = "Status icon",
-                                                tint = themeTextColor.copy(alpha = 0.6f),
-                                                modifier = Modifier
-                                                    .size(18.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text(
-                                                text = mangaDetail.status ?: "Unknown",
-                                                color = themeTextColor.copy(alpha = 0.6f),
-                                                fontSize = 14.sp,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis,
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                            )
-                                        }
-                                    }
-
-                                }
-                            }
-
-                            Spacer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(16.dp)
-                            )
-                        }
-                    }
-                }
-
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            repeat(5) { i ->
-                                if (((mangaDetail.rating?.toDouble() ?: 0.0) - i) >= 1) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.filled_star),
-                                        contentDescription = "Full star",
-                                        tint = colorResource(id = R.color.orange)
-                                    )
-                                } else if (((mangaDetail.rating?.toDouble() ?: 0.0) - i) >= 0.5) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.half_star),
-                                        contentDescription = "Half star",
-                                        tint = colorResource(id = R.color.orange)
-                                    )
-                                } else {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.outline_star),
-                                        contentDescription = "Empty star",
-                                        tint = colorResource(id = R.color.orange)
-                                    )
-                                }
-                            }
-                        }
-
-                        Row {
-                            Icon(
-                                painter = painterResource(id = view),
-                                contentDescription = "View icon",
-                                tint = themeTextColor.copy(alpha = 0.6f),
-                                modifier = Modifier
-                                    .size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = mangaDetail.view ?: "??",
-                                color = themeTextColor.copy(alpha = 0.6f),
-                                fontSize = 14.sp,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                }
-
-                item {
-                    ExtendableText(
-                        description = mangaDetail.description ?: "",
-                        themeTextColor = themeTextColor,
-                        themeBackgroundColor = themeBackgroundColor
-                    )
-                }
-
-                item {
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                    ) {
-                        items(mangaDetail.genres) {
-                            Text(
-                                text = it.name ?: "",
-                                color = themeTextColor,
-                                fontSize = 14.sp,
-                                modifier = Modifier
-                                    .border(
-                                        width = 1.dp,
-                                        color = themeTextColor,
-                                        shape = RoundedCornerShape(6.dp)
-                                    )
-                                    .padding(horizontal = 10.dp, vertical = 2.dp)
-                                    .clickable {
-                                        navController.navigate(BottomNavScreens.Browse.route) {
-                                            popUpTo(navController.graph.findStartDestination().id)
-                                            launchSingleTop = true
-                                        }
-
-                                        mainViewModel._selectedTab.value = "Filter"
-                                        mainViewModel.feedChange.value = true
-                                        mainViewModel._feedResponse.value.clear()
-                                        mainViewModel._hasNextPage.value = true
-                                        mainViewModel._currentPage.value = 1
-
-                                        val url =
-                                            "https://manganato.com/advanced_search?s=all&g_i=_${it.id}_&page=${mainViewModel._currentPage.value}"
-                                        //"https://manganato.com/genre-${it.id}/${mainViewModel._currentPage.value}"
-
-                                        mainViewModel.advancedSearchUrl.value = url
-                                        mainViewModel.getAdvancedSearchFeed()
-                                    }
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                        }
-                    }
-                }
-
-                items(mangaDetail.chapterList) {
-                    mainViewModel.onUpdate.value
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .clickable {
-                                mainViewModel._chapterDetail.value = it
-
-                                mainViewModel._mangaDetail.value = mangaDetail
-
-                                //mainViewModel.getChapter()
-
-                                navController.navigate("${DetailNavScreens.ChapterScreen.route}?chapterUrl=${it.chapterUrl}&chapterTitle=${it.title}")
-
-                                mainViewModel.updateUI()
-                            }
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = it.title ?: "",
-                                color = if(historyViewModel.existHistory(mangaChapterUrl = it.chapterUrl!!)) themeTextColor.copy(alpha = 0.6f) else themeTextColor,
-                                fontSize = 14.sp,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier
-                                    .fillMaxWidth(0.7f)
-                            )
-
-                            Row {
-                                Icon(
-                                    painter = painterResource(id = view),
-                                    contentDescription = "View icon",
-                                    tint = themeTextColor.copy(alpha = 0.6f),
-                                    modifier = Modifier
-                                        .size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(2.dp))
-                                Text(
-                                    text = it.view ?: "??",
-                                    color = themeTextColor.copy(alpha = 0.6f),
-                                    fontSize = 13.sp,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-
-                        Text(
-                            text = it.uploadedAt ?: "",
-                            color = themeTextColor.copy(alpha = 0.6f),
-                            fontSize = 13.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier
-                                .fillMaxWidth(0.4f)
-                                .padding(horizontal = 4.dp)
-                        )
-                    }
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(16.dp)
-                    )
-                }
-            }*/
         }
         is UiState.Error -> {
             Text(text = (uiState as UiState.Error).message)
@@ -765,7 +343,7 @@ fun NeloMangaScreen(
                         )
                     }
                 },
-                backgroundColor = Color.Transparent,
+                backgroundColor = Color.White,
                 elevation = 0.dp,
                 modifier = Modifier
                     .padding(16.dp)
@@ -786,138 +364,138 @@ fun NeloMangaScreen(
                             RoundedCornerShape(topStart = 48.dp, topEnd = 48.dp)
                         )
                 ) {
-                    LazyColumn(
-                        state = state,
+                    Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = 32.dp, vertical = 16.dp)
-                            .drawBehind {
-                                val firstVisibleItemIndex = state.firstVisibleItemIndex
-                                val totalItems = mangaDetail.chapterList.size
-                                val visibleItems = 10 // Approximate visible items
-
-                                if (totalItems > visibleItems) {
-                                    showScrollbar.value = true
-                                }
-
-                                if (showScrollbar.value) {
-                                    val scrollbarHeight =
-                                        size.height * (visibleItems / totalItems.toFloat())
-                                    val scrollbarY =
-                                        size.height * (firstVisibleItemIndex / totalItems.toFloat())
-
-                                    drawRoundRect(
-                                        color = scrollBarColor,
-                                        topLeft = Offset(size.width - 4.dp.toPx(), scrollbarY),
-                                        size = Size(4.dp.toPx(), scrollbarHeight),
-                                        cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx())
-                                    )
-                                }
-                            }
                     ) {
-                        item {
-                            Spacer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(5.dp)
-                                    .padding(start = 130.dp, end = 130.dp)
-                                    .clip(RoundedCornerShape(50.dp))
-                                    .background(Color.Black)
-                            )
-                        }
-                        item { Spacer(modifier = Modifier.height(16.dp))}
-                        item {
-                            Text(
-                                text = "All Chapters (${mangaDetail.chapterList.size})",
-                                color = Color.Black,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 18.sp
-                            )
-                        }
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(5.dp)
+                                .padding(start = 130.dp, end = 130.dp)
+                                .clip(RoundedCornerShape(50.dp))
+                                .background(Color.Black)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "All Chapters (${mangaDetail.chapterList.size})",
+                            color = Color.Black,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 18.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LazyColumn(
+                            state = state,
+                            modifier = Modifier
+                                .drawBehind {
+                                    val firstVisibleItemIndex = state.firstVisibleItemIndex
+                                    val totalItems = mangaDetail.chapterList.size
+                                    val visibleItems = 10 // Approximate visible items
 
-                        items(mangaDetail.chapterList) {
-                            mainViewModel.onUpdate.value
-                            Column(
-                                horizontalAlignment = Alignment.Start,
-                                modifier = Modifier
-                                    .padding(top = 16.dp)
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        mainViewModel._chapterDetail.value = it
-
-                                        mainViewModel._mangaDetail.value = mangaDetail
-
-                                        //mainViewModel.getChapter()
-
-                                        navController.navigate("${DetailNavScreens.ChapterScreen.route}?chapterUrl=${it.chapterUrl}&chapterTitle=${it.title}")
-
-                                        mainViewModel.updateUI()
+                                    if (totalItems > visibleItems) {
+                                        showScrollbar.value = true
                                     }
-                            ) {
-                                Row(
+
+                                    if (showScrollbar.value) {
+                                        val scrollbarHeight =
+                                            size.height * (visibleItems / totalItems.toFloat())
+                                        val scrollbarY =
+                                            size.height * (firstVisibleItemIndex / totalItems.toFloat())
+
+                                        drawRoundRect(
+                                            color = scrollBarColor,
+                                            topLeft = Offset(size.width - 4.dp.toPx(), scrollbarY),
+                                            size = Size(4.dp.toPx(), scrollbarHeight),
+                                            cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx())
+                                        )
+                                    }
+                                }
+                        ) {
+                            items(mangaDetail.chapterList) {
+                                mainViewModel.onUpdate.value
+                                Column(
+                                    horizontalAlignment = Alignment.Start,
                                     modifier = Modifier
-                                        .fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                        .padding(top = 16.dp, end = 8.dp)
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            mainViewModel._chapterDetail.value = it
+
+                                            mainViewModel._mangaDetail.value = mangaDetail
+
+                                            //mainViewModel.getChapter()
+
+                                            navController.navigate("${DetailNavScreens.ChapterScreen.route}?chapterUrl=${it.chapterUrl}&chapterTitle=${it.title}")
+
+                                            mainViewModel.updateUI()
+                                        }
                                 ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            text = it.title ?: "",
+                                            color = if(historyViewModel.existHistory(mangaChapterUrl = it.chapterUrl!!)) Color.Black.copy(alpha = 0.6f) else Color.Black,
+                                            fontSize = 14.sp,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier
+                                                .fillMaxWidth(0.7f)
+                                        )
+
+                                        Row {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.outline_eye),
+                                                contentDescription = "View icon",
+                                                tint = Color.Black.copy(alpha = 0.6f),
+                                                modifier = Modifier
+                                                    .size(18.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(2.dp))
+                                            Text(
+                                                text = it.view ?: "??",
+                                                color = Color.Black.copy(alpha = 0.6f),
+                                                fontSize = 13.sp,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+                                    }
+
                                     Text(
-                                        text = it.title ?: "",
-                                        color = if(historyViewModel.existHistory(mangaChapterUrl = it.chapterUrl!!)) Color.Black.copy(alpha = 0.6f) else Color.Black,
-                                        fontSize = 14.sp,
+                                        text = it.uploadedAt ?: "",
+                                        color = Color.Black.copy(alpha = 0.6f),
+                                        fontSize = 13.sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                         modifier = Modifier
-                                            .fillMaxWidth(0.7f)
+                                            .fillMaxWidth(0.4f)
                                     )
-
-                                    Row {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.outline_eye),
-                                            contentDescription = "View icon",
-                                            tint = Color.Black.copy(alpha = 0.6f),
-                                            modifier = Modifier
-                                                .size(18.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(2.dp))
-                                        Text(
-                                            text = it.view ?: "??",
-                                            color = Color.Black.copy(alpha = 0.6f),
-                                            fontSize = 13.sp,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
                                 }
-
-                                Text(
-                                    text = it.uploadedAt ?: "",
-                                    color = Color.Black.copy(alpha = 0.6f),
-                                    fontSize = 13.sp,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
+                                Spacer(
                                     modifier = Modifier
-                                        .fillMaxWidth(0.4f)
+                                        .fillMaxWidth()
+                                        .height(8.dp)
                                 )
+
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(2.dp)
+                                        .clip(RoundedCornerShape(50.dp))
+                                        .background(Color.Black)
+                                )
+
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(8.dp)
+                                )
+
                             }
-                            Spacer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(8.dp)
-                            )
-
-                            Spacer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(2.dp)
-                                    .clip(RoundedCornerShape(50.dp))
-                                    .background(Color.Black)
-                            )
-
-                            Spacer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(8.dp)
-                            )
-
                         }
                     }
                 }

@@ -274,6 +274,7 @@ fun HistoryScreen(
                                                 )
                                                 //mainViewModel.getManga()
 
+                                                sharedViewModel.mangaUrl = it.mangaUrl
                                                 sharedViewModel.getMangaDetails(it.mangaUrl)
                                                 navController.navigate("${DetailNavScreens.ChapterScreen.route}?chapterUrl=${it.mangaChapterUrl}&chapterTitle=${it.mangaChapter}&mangaUrl=${it.mangaUrl}")
                                                 //navController.navigate(DetailNavScreens.ChapterScreen.route)
