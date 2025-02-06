@@ -17,10 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -50,7 +48,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -84,7 +81,6 @@ fun PageListView(
         Log.e("TEXT_PAGE_UI", "loading chapter, fetching...")
         sharedViewModel.getChapterDetails(chapterUrl = chapterUrl, chapterTitle = chapterTitle)
         Log.e("TEXT_PAGE_UI", "loading chapter, fecthed")
-        state.scrollToItem(0)
     }
 
     val toggleTheme = mainViewModel.toggleTheme.value
@@ -92,7 +88,6 @@ fun PageListView(
 
     val themeBackgroundColor = if (toggleTheme) Color.White else Color.Black
     val themeTextColor = if (toggleTheme) Color.Black else Color.White
-
 
     when(uiState) {
         is UiState.Loading -> {
@@ -123,7 +118,7 @@ fun PageListView(
                         mangaDetail = manga,
                         currentChapter = chapterDetail,
                         onBackClicked = {
-                                        navController.popBackStack()
+                            navController.popBackStack()
                         },
                         onChapterSelected = { chapter ->
                             sharedViewModel.getChapterDetails(chapter.chapterUrl!!, chapter.title!!)

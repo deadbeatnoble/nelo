@@ -38,6 +38,7 @@ class SharedViewModel @Inject constructor(
     //methods
 
     fun getMangaDetails(mangaUrl: String) {
+        _mangaDetailsUiState.value = UiState.Loading
         CoroutineScope(Dispatchers.IO).launch {
             val result = getMangaDetailsUseCase(mangaUrl = mangaUrl)
 
@@ -53,50 +54,73 @@ class SharedViewModel @Inject constructor(
     }
 
     fun getChapterDetails(chapterUrl: String, chapterTitle: String) {
+        _chapterDetailsUiState.value = UiState.Loading
         CoroutineScope(Dispatchers.IO).launch {
             Log.e("TEST", "ChapterUiState is Launching")
-            if (mangaDetailsUiState.value is UiState.Success<MangaModel>){
-                val result = getChapterDetailsUseCase.invoke(
-                    chapterUrl = chapterUrl,
-                    chapterTitle = chapterTitle
-                )
 
-                if (result.isSuccess) {
-                    Log.e("TEST", "ChapterUiState is Successful -> " + UiState.Success(result.getOrNull()!!).data.toString())
+            val result = getChapterDetailsUseCase.invoke(
+                chapterUrl = chapterUrl,
+                chapterTitle = chapterTitle
+            )
 
-                    _chapterDetailsUiState.value = UiState.Success(result.getOrNull()!!)
+            if (result.isSuccess) {
+                Log.e("TEST", "ChapterUiState is Successful -> " + UiState.Success(result.getOrNull()!!).data.toString())
+                _chapterDetailsUiState.value = UiState.Success(result.getOrNull()!!)
 
-                    _prevChapterDetails.value = getPreviousChapterDetails()
-                    Log.e("TEST","Prev Chapter is Successful -> " + _prevChapterDetails.value.toString())
-                    _nextChapterDetails.value = getNextChapterDetails()
-                    Log.e("TEST","Next Chapter is Successful -> " + _nextChapterDetails.value.toString())
-                } else {
-                    Log.e("TEST", "ChapterUiState is Successful -> " + UiState.Error(result.exceptionOrNull()?.message.toString()).message.toString())
-                    _chapterDetailsUiState.value =
-                        UiState.Error(result.exceptionOrNull()?.message ?: "An error occurred")
+                if (mangaDetailsUiState.value !is UiState.Success) {
+                    getMangaDetails(mangaUrl)
+                    mangaUrl = ""
+                }
+
+                mangaDetailsUiState.collect { state ->
+                    if (state is UiState.Success) {
+                        _prevChapterDetails.value = getPreviousChapterDetails()
+                        _nextChapterDetails.value = getNextChapterDetails()
+
+                        Log.e("TEST","Prev Chapter is Successful -> " + _prevChapterDetails.value.toString())
+                        Log.e("TEST","Next Chapter is Successful -> " + _nextChapterDetails.value.toString())
+
+                        return@collect
+                    }
                 }
             } else {
-                getMangaDetails(mangaUrl = mangaUrl)
-                Log.e("TEST", "ChapterUiState has failed")
+                Log.e("TEST", "ChapterUiState is Successful -> " + UiState.Error(result.exceptionOrNull()?.message.toString()).message)
+                _chapterDetailsUiState.value =
+                    UiState.Error(result.exceptionOrNull()?.message ?: "An error occurred")
             }
         }
     }
 
     private fun getPreviousChapterDetails(): ChapterModel {
-        val index = (mangaDetailsUiState.value as UiState.Success<MangaModel>).data.chapterList.indexOfFirst {
-            it.chapterUrl == (chapterDetailsUiState.value as UiState.Success<ChapterModel>).data.chapterUrl
+        val chapterState = chapterDetailsUiState.value
+        val mangaState = mangaDetailsUiState.value
+
+        return if (mangaState is UiState.Success && chapterState is UiState.Success) {
+            val index = mangaState.data.chapterList.indexOfFirst {
+                it.chapterUrl == chapterState.data.chapterUrl
+            }
+            Log.e("INDEX", "Current chapter -> $index")
+            Log.e("Manga UIState", mangaDetailsUiState.value.toString())
+            if (index < (mangaDetailsUiState.value as UiState.Success<MangaModel>).data.chapterList.size - 1) (mangaDetailsUiState.value as UiState.Success<MangaModel>).data.chapterList[index + 1] else ChapterModel(title = null, view = null, uploadedAt = null, chapterUrl = null, pages = emptyList())
+        } else {
+            ChapterModel(title = null, view = null, uploadedAt = null, chapterUrl = null, pages = emptyList())
         }
-        Log.e("INDEX", "Current chapter -> $index")
-        Log.e("Manga UIState", mangaDetailsUiState.value.toString())
-        return if (index < (mangaDetailsUiState.value as UiState.Success<MangaModel>).data.chapterList.size - 1) (mangaDetailsUiState.value as UiState.Success<MangaModel>).data.chapterList[index + 1] else ChapterModel(title = null, view = null, uploadedAt = null, chapterUrl = null, pages = emptyList())
+
     }
 
     private fun getNextChapterDetails(): ChapterModel {
-        val index = (mangaDetailsUiState.value as UiState.Success<MangaModel>).data.chapterList.indexOfFirst {
-            it.chapterUrl == (chapterDetailsUiState.value as UiState.Success<ChapterModel>).data.chapterUrl
+        val chapterState = chapterDetailsUiState.value
+        val mangaState = mangaDetailsUiState.value
+
+        return if (mangaState is UiState.Success && chapterState is UiState.Success) {
+            val index = (mangaDetailsUiState.value as UiState.Success<MangaModel>).data.chapterList.indexOfFirst {
+                it.chapterUrl == (chapterDetailsUiState.value as UiState.Success<ChapterModel>).data.chapterUrl
+            }
+            Log.e("INDEX", "Current chapter -> $index")
+            Log.e("Manga UIState", mangaDetailsUiState.value.toString())
+            if (index > 0) (mangaDetailsUiState.value as UiState.Success<MangaModel>).data.chapterList[index - 1] else ChapterModel(title = null, view = null, uploadedAt = null, chapterUrl = null, pages = emptyList())
+        } else {
+            ChapterModel(title = null, view = null, uploadedAt = null, chapterUrl = null, pages = emptyList())
         }
-        Log.e("INDEX", "Current chapter -> $index")
-        Log.e("Manga UIState", mangaDetailsUiState.value.toString())
-        return if (index > 0) (mangaDetailsUiState.value as UiState.Success<MangaModel>).data.chapterList[index - 1] else ChapterModel(title = null, view = null, uploadedAt = null, chapterUrl = null, pages = emptyList())
     }
 }
