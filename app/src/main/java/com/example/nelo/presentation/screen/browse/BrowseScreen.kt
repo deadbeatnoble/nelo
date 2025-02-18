@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -44,6 +45,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -206,20 +208,20 @@ fun BrowseScreen(
                     .clip(RoundedCornerShape(12.dp))
             ) {
                 LazyColumn(
-                    contentPadding = PaddingValues(bottom = 50.dp)
+                    contentPadding = PaddingValues(bottom = 100.dp)
                 ) {
                     item {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color.Red)
-                                .padding(start = 20.dp, bottom = 8.dp),
+                                .background(colorResource(id = R.color.blue_bg))
+                                .padding(start = 20.dp, bottom = 8.dp, end = 20.dp, top = 8.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
                                 text = "Reset",
-                                color = themeTextColor,
+                                color = Color.White,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier
@@ -244,6 +246,10 @@ fun BrowseScreen(
                                     }
                             )
                             Button(
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = colorResource(id = R.color.orange_bg)
+                                ),
+                                border = BorderStroke(1.dp, Color.Black),
                                 onClick = {
                                     mainViewModel._currentPage.value = 1
                                     val url = buildString {
@@ -310,7 +316,7 @@ fun BrowseScreen(
                             ) {
                                 Text(
                                     text = "Filter",
-                                    color = themeTextColor
+                                    color = Color.Black
                                 )
                             }
                         }
@@ -327,6 +333,7 @@ fun BrowseScreen(
                                 .fillMaxWidth()
                                 .padding(start = 16.dp, end = 16.dp)
                         ) {
+                            Spacer(modifier = Modifier.height(6.dp))
                             OutlinedTextField(
                                 value = selectedKeyword.value,
                                 onValueChange = {
@@ -346,7 +353,7 @@ fun BrowseScreen(
                                             text = "Keyword",
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = Color.Red
+                                            color = colorResource(id = R.color.blue_bg)
                                         )
                                 },
                                 trailingIcon = {
@@ -428,7 +435,7 @@ fun BrowseScreen(
                                         text = "Order By",
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = Color.Red
+                                        color = colorResource(id = R.color.blue_bg)
                                     )
                                 },
                                 trailingIcon = {
@@ -510,7 +517,7 @@ fun BrowseScreen(
                                         text = "Status",
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = Color.Red
+                                        color = colorResource(id = R.color.blue_bg)
                                     )
                                 },
                                 trailingIcon = {
@@ -574,7 +581,7 @@ fun BrowseScreen(
                         ){
                             Text(
                                 text = "Genres",
-                                color = Color.Red,
+                                color = colorResource(id = R.color.blue_bg),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier
@@ -1372,7 +1379,7 @@ fun TripleCheckBox(
                     tint = themeTextColor,
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Red)
+                        .background(colorResource(id = R.color.red_bg))
                 )
             }
         }
@@ -1389,7 +1396,7 @@ fun TripleCheckBox(
                     tint = themeTextColor,
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Red)
+                        .background(colorResource(id = R.color.red_bg))
                 )
             }
         }

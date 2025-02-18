@@ -78,6 +78,8 @@ import com.example.nelo.presentation.viewmodels.LibraryViewModel
 import com.example.nelo.domain.model.MangaModel
 import com.example.nelo.presentation.navigation.BottomNavScreens
 import com.example.nelo.presentation.navigation.DetailNavScreens
+import com.example.nelo.presentation.screen.browse.ErrorDialog
+import com.example.nelo.presentation.screen.browse.LoadingDialog
 import com.example.nelo.presentation.viewmodels.SharedViewModel
 import com.example.nelo.util.UiState
 
@@ -120,7 +122,15 @@ fun MangaScreen(
 
     when(uiState) {
         is UiState.Loading -> {
-            CircularProgressIndicator()
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+                    .padding(horizontal = 32.dp)
+            ) {
+                LoadingDialog()
+            }
         }
         is UiState.Success -> {
             val mangaDetail = (uiState as UiState.Success<MangaModel>).data
@@ -141,7 +151,25 @@ fun MangaScreen(
             )
         }
         is UiState.Error -> {
-            Text(text = (uiState as UiState.Error).message)
+            //Text(text = (uiState as UiState.Error).message)
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+                    .padding(horizontal = 32.dp)
+
+            ) {
+                val errorMessage = (uiState as UiState.Error).message
+                Spacer(modifier = Modifier.height(50.dp))
+                ErrorDialog(
+                    errorMessage = errorMessage,
+                    onRetryClicked = {
+                        sharedViewModel.getMangaDetails(mangaUrl = mainViewModel.mangaDetail.value.mangaUrl!!)
+                        libraryViewModel.existState(mangaUrl = manga.mangaUrl!!)
+                    }
+                )
+            }
         }
     }
 

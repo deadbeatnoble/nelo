@@ -1,10 +1,13 @@
 package com.example.nelo.presentation.screen.library
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,8 +30,11 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -72,24 +78,32 @@ fun LibraryScreen(
                 title = {
                     Text(
                         text = "Library",
-                        color = themeBackgroundColor,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
+                        style = TextStyle(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 20.sp,
+                            color = Color.Black
+                        ),
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .fillMaxWidth()
                     )
                 },
-                backgroundColor = themeTextColor,
+                backgroundColor = Color.White,
+                elevation = 0.dp,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .padding(16.dp)
             )
         },
-        containerColor = themeBackgroundColor,
+        containerColor = Color.White,
         content = {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                contentPadding = PaddingValues(top = 55.dp, bottom = 50.dp)
+                contentPadding = PaddingValues(top = 80.dp, bottom = 50.dp)
             ) {
                 items(library) {
                     Box(
@@ -97,6 +111,7 @@ fun LibraryScreen(
                             .aspectRatio(225f / 337f)
                             .padding(6.dp)
                             .clip(RoundedCornerShape(12.dp))
+                            .border(2.dp, Color.Black, RoundedCornerShape(16.dp))
                             .clickable {
                                 if (navController.currentBackStackEntry?.destination?.route != DetailNavScreens.MangaScreen.route) {
                                     mainViewModel._mangaDetail.value =
@@ -128,29 +143,25 @@ fun LibraryScreen(
 
                         Box(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .drawWithCache {
-                                    val gradient = Brush.verticalGradient(
-                                        colors = listOf(
+                                .fillMaxWidth()
+                                .fillMaxHeight(0.45f)
+                                .align(Alignment.BottomCenter)
+                                .background(
+                                    brush = Brush.verticalGradient(
+                                        listOf(
                                             Color.Transparent,
-                                            Color.Black.copy(alpha = 0.6f)
+                                            Color.White
                                         ),
-                                        startY = (size.height / 4) + (size.height / 2),
-                                        endY = size.height
+                                        startY = 0f,
+                                        endY = Float.POSITIVE_INFINITY,
+                                        tileMode = TileMode.Decal
                                     )
-                                    onDrawWithContent {
-                                        drawContent()
-                                        drawRect(
-                                            gradient,
-                                            blendMode = BlendMode.Multiply
-                                        )
-                                    }
-                                }
+                                )
                         )
 
                         Text(
                             text = it.mangaTitle,
-                            color = Color.White,
+                            color = Color.Black,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
                             lineHeight = 13.sp,
