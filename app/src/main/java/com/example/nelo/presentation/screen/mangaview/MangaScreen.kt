@@ -57,6 +57,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -69,7 +70,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.example.nelo.MainViewModel
 import com.example.nelo.R
 import com.example.nelo.presentation.viewmodels.HistoryViewModel
@@ -545,9 +547,10 @@ fun NeloMangaScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    AsyncImage(
-                        model = mangaDetail.thumbnail,
+                    SubcomposeAsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current).addHeader("Referer", "https://www.nelomanga.com/").data(mangaDetail.thumbnail).build(),
                         contentDescription = "manga cover",
+                        loading = { CircularProgressIndicator()},
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .width(145.dp)
@@ -700,7 +703,7 @@ fun NeloMangaScreen(
                                         "https://manganato.com/advanced_search?s=all&g_i=_${it.id}_&page=${mainViewModel._currentPage.value}"
                                     //"https://manganato.com/genre-${it.id}/${mainViewModel._currentPage.value}"
 
-                                    mainViewModel.advancedSearchUrl.value = url
+                                    mainViewModel.advancedSearchUrl.value = it.url ?: ""
                                     mainViewModel.getAdvancedSearchFeed()
                                 }
                         )

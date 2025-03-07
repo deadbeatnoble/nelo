@@ -36,7 +36,7 @@ class MangaRepositoryImpl(
         val documentResult = pageScraper.scrapeWebPage(chapterUrl)
         return documentResult.fold(
             onSuccess = { document ->
-                val dataResult = parser.chapterDetailsParser(doc = document, chapterTitle = chapterTitle, referrer = chapterUrl)
+                val dataResult = parser.chapterDetailsParser(doc = document, chapterTitle = chapterTitle, referrer = "https://www.nelomanga.com/")
                 dataResult.fold(
                     onSuccess = { data ->
                         Result.success(data)
@@ -53,7 +53,9 @@ class MangaRepositoryImpl(
     }
 
     override suspend fun getPopularMangas(page: Int): Result<FeedResponseModel> {
-        val documentResult = pageScraper.scrapeWebPage("https://manganato.com/genre-all${if (page > 1) "/${page}" else ""}?type=topview")
+        //https://www.nelomanga.com/manga-list/hot-manga?page=2
+        //old web -> "https://manganato.com/genre-all${if (page > 1) "/${page}" else ""}?type=topview"
+        val documentResult = pageScraper.scrapeWebPage("https://www.nelomanga.com/manga-list/hot-manga${if (page > 1) "?page=${page}" else ""}")
         return documentResult.fold(
             onSuccess = { document ->
                 val dataResult = parser.feedParser(document)
@@ -73,7 +75,9 @@ class MangaRepositoryImpl(
     }
 
     override suspend fun getLatestMangas(page: Int): Result<FeedResponseModel> {
-        val documentResult = pageScraper.scrapeWebPage("https://manganato.com/genre-all${if (page > 1) "/${page}" else ""}")
+        //https://www.nelomanga.com/manga-list/latest-manga
+        //old web -> "https://manganato.com/genre-all${if (page > 1) "/${page}" else ""}"
+        val documentResult = pageScraper.scrapeWebPage("https://www.nelomanga.com/manga-list/latest-manga${if (page > 1) "?page=${page}" else ""}")
         return documentResult.fold(
             onSuccess = { document ->
                 val dataResult = parser.feedParser(document)
@@ -93,7 +97,9 @@ class MangaRepositoryImpl(
     }
 
     override suspend fun getNewestMangas(page: Int): Result<FeedResponseModel> {
-        val documentResult = pageScraper.scrapeWebPage("https://manganato.com/genre-all${if (page > 1) "/${page}" else ""}?type=newest")
+        //https://www.nelomanga.com/manga-list/new-manga
+        //old web -> "https://manganato.com/genre-all${if (page > 1) "/${page}" else ""}?type=newest"
+        val documentResult = pageScraper.scrapeWebPage("https://www.nelomanga.com/manga-list/new-manga${if (page > 1) "?page=${page}" else ""}")
         return documentResult.fold(
             onSuccess = { document ->
                 val dataResult = parser.feedParser(document)

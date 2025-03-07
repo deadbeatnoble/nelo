@@ -46,6 +46,7 @@ import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -73,6 +74,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
@@ -87,7 +89,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.example.nelo.MainViewModel
 import com.example.nelo.R
 import com.example.nelo.domain.model.ChapterModel
@@ -1077,9 +1080,12 @@ fun BrowseScreen(
                                             }
                                         }
                                 ) {
-                                    AsyncImage(
-                                        model = it.thumbnail,
+                                    SubcomposeAsyncImage(
+                                        model = ImageRequest.Builder(LocalContext.current).addHeader("Referer", "https://www.nelomanga.com/").data(it.thumbnail).build(),
                                         contentDescription = "Manga Cover",
+                                        loading = {
+                                                  CircularProgressIndicator()
+                                        },
                                         contentScale = ContentScale.Crop,
                                         modifier = Modifier
                                             .fillMaxSize()
