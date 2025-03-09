@@ -175,33 +175,6 @@ fun BrowseScreen(
     val themeBackgroundColor = Color.White
     val themeTextColor = Color.Black
 
-    /*
-    val toggleTheme = mainViewModel.toggleTheme.value
-    val feedResponseError = mainViewModel.feedResponseError.value
-    val onUpdate = mainViewModel.onUpdate.value
-    val isEndReached = remember {
-        derivedStateOf {
-            (gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) + 1 >
-                    gridState.layoutInfo.totalItemsCount - 2
-        }
-    }
-    //val feedUiState by sharedViewModel.feedUiState.collectAsState()
-    //val selectedColor = Color.Red
-    //val theme = if (toggleTheme) R.drawable.light else R.drawable.dark
-    //val selectedTab = mainViewModel.selectedTab.value
-    //val isLoading = mainViewModel.isLoading.value
-    //val feedResponse = mainViewModel.feedResponse.value
-    //val selectedKeyword = remember { mutableStateOf(keyTypes[0]) }
-    //val keyword = remember { mutableStateOf("") }
-    val searchExpanded = remember {
-        mutableStateOf(false)
-    }
-    LaunchedEffect(true) {
-        if (keyword.value.isNotEmpty()) {
-            searchExpanded.value = true
-        }
-    }*/
-
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetContent = {
@@ -309,7 +282,7 @@ fun BrowseScreen(
                                         keyType = selectedKeyword.value,
                                         keyWord = keyword.value
                                     )
-                                    browseViewModel.switchCategory(category = "filter")
+                                    browseViewModel.switchCategory(category = "filter", newSearch = true)
                                     /////////////////////////////
 
                                     scope.launch {
@@ -666,269 +639,6 @@ fun BrowseScreen(
                 .background(themeBackgroundColor)
                 .padding(start = 16.dp, end = 16.dp, top = 24.dp)
         ){
-            /*Column (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(themeTextColor)
-            ){
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(66.dp)
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    if(!searchExpanded.value){
-                        Row(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                        ) {
-                            Text(
-                                text = "NaNaNa",
-                                color = themeBackgroundColor,
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontStyle = FontStyle.Italic
-                            )
-                        }
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                    ) {
-                        if(!searchExpanded.value){
-                            IconButton(
-                                onClick = {
-                                    searchExpanded.value = true
-                                }
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.search),
-                                    contentDescription = "Search icon",
-                                    tint = themeBackgroundColor,
-                                    modifier = Modifier
-                                        .size(25.dp)
-                                )
-                            }
-                        } else {
-                            val keyboardController = LocalSoftwareKeyboardController.current
-
-                            OutlinedTextField(
-                                value = keyword.value,
-                                onValueChange = {
-                                    keyword.value = it
-                                },
-                                textStyle = TextStyle(
-                                    fontSize = 15.sp
-                                ),
-                                leadingIcon = {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.search),
-                                        contentDescription = "Search icon",
-                                        tint = themeTextColor.copy(alpha = 0.6f)
-                                    )
-                                },
-                                trailingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "close",
-                                        tint = themeTextColor.copy(alpha = 0.6f),
-                                        modifier = Modifier
-                                            .clickable {
-                                                if (keyword.value.isEmpty()) {
-                                                    searchExpanded.value = false
-                                                }
-                                                keyword.value = ""
-                                            }
-                                    )
-                                },
-                                keyboardActions = KeyboardActions(
-                                    onDone = {
-                                        keyboardController?.hide()
-
-                                        mainViewModel._currentPage.value = 1
-                                        val url = buildString {
-                                            append("https://manganato.com/advanced_search?s=all")
-
-                                            if(include.isNotEmpty()) {
-                                                append("&g_i=_${include.joinToString("_")}_")
-                                            }
-
-                                            if(excluded.isNotEmpty()) {
-                                                append("&g_e=_${excluded.joinToString("_")}_")
-                                            }
-
-                                            when(selectedStatus.value) {
-                                                status[0] -> append("")
-                                                status[1] -> append("&sts=ongoing")
-                                                status[2] -> append("&sts=completed")
-                                            }
-
-                                            when(selectedOrderBy.value) {
-                                                orderBy[0] -> append("")
-                                                orderBy[1] -> append("&orby=topview")
-                                                orderBy[2] -> append("&orby=newest")
-                                                orderBy[3] -> append("&orby=az")
-                                            }
-
-                                            append("&page=${mainViewModel._currentPage.value}")
-
-                                            if (keyword.value.isNotEmpty()) {
-                                                when(selectedKeyword.value) {
-                                                    keyTypes[0] -> append("")
-                                                    keyTypes[1] -> append("&keyt=title")
-                                                    keyTypes[2] -> append("&keyt=alternative")
-                                                    keyTypes[3] -> append("&keyt=author")
-                                                }
-
-                                                append("&keyw=${keyword.value}")
-                                            }
-                                        }
-                                        mainViewModel.advancedSearchUrl.value = url
-                                        mainViewModel._selectedTab.value = tabs[2]
-                                        mainViewModel.feedChange.value = true
-                                        mainViewModel._hasNextPage.value = true
-                                        mainViewModel._feedResponse.value.clear()
-                                        //mainViewModel.getAdvancedSearchFeed()
-
-
-                                        /////////////////////////////
-                                        browseViewModel.filter = FilterModel(
-                                            include = include.toList(),
-                                            exclude = excluded.toList(),
-                                            status = selectedStatus.value,
-                                            orderBy = selectedOrderBy.value,
-                                            keyType = selectedKeyword.value,
-                                            keyWord = keyword.value
-                                        )
-                                        browseViewModel.switchCategory(category = "filter")
-                                        /////////////////////////////
-                                    }
-                                ),
-                                singleLine = true,
-                                colors = TextFieldDefaults.outlinedTextFieldColors(
-                                    textColor = themeTextColor,
-                                    containerColor = themeBackgroundColor
-                                ),
-                                modifier = Modifier
-                                    .fillMaxWidth(0.85f)
-                                    .fillMaxHeight()
-                                    .clip(RoundedCornerShape(10.dp))
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                        }
-
-                        IconButton(onClick = {
-                            mainViewModel._toggleTheme.value = !toggleTheme
-                        }) {
-                            Icon(
-                                painter = painterResource(id = theme),
-                                contentDescription = "Toggle Night/Dark mode",
-                                tint = colorResource(R.color.orange),
-                                modifier = if (toggleTheme) {
-                                    Modifier
-                                        .size(25.dp)
-                                } else {
-                                    Modifier
-                                        .size(25.dp)
-                                        .clip(RoundedCornerShape(50.dp))
-                                        .background(color = colorResource(R.color.dark_blue))
-                                        .padding(2.dp)
-                                }
-                            )
-                        }
-                    }
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp, horizontal = 32.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .clickable {
-                                mainViewModel.updateSelectedTab(tabs[0])
-
-                                browseViewModel.switchCategory(category = "popular")
-                            }
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.hot),
-                            contentDescription = "Icon",
-                            tint = if (selectedTab == "Popular") selectedColor else themeBackgroundColor,
-                            modifier = Modifier
-                                .size(25.dp)
-                        )
-                        Text(
-                            text = "Popular",
-                            color = if (selectedTab == "Popular") selectedColor else themeBackgroundColor,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .clickable {
-                                mainViewModel.updateSelectedTab(tabs[1])
-
-                                browseViewModel.switchCategory(category = "latest")
-                            }
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.latest),
-                            contentDescription = "Icon",
-                            tint = if (selectedTab == "Latest") selectedColor else themeBackgroundColor,
-                            modifier = Modifier
-                                .size(25.dp)
-                        )
-
-                        Text(
-                            text = "Latest ",
-                            color = if (selectedTab == "Latest") selectedColor else themeBackgroundColor,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .clickable {
-                                scope.launch {
-                                    if (bottomSheetState.isExpanded) {
-                                        bottomSheetState.collapse()
-                                    } else {
-                                        bottomSheetState.expand()
-                                    }
-                                }
-                            }
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.filter),
-                            contentDescription = "Icon",
-                            tint = if (selectedTab == "Filter") selectedColor else themeBackgroundColor,
-                            modifier = Modifier
-                                .size(25.dp)
-                        )
-
-                        Text(
-                            text = "Filter ",
-                            color = if (selectedTab == "Filter") selectedColor else themeBackgroundColor,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-            }*/
             MySearchBar(
                 text = keyword.value,
                 onTextChange = {
@@ -995,7 +705,9 @@ fun BrowseScreen(
                         keyType = selectedKeyword.value,
                         keyWord = keyword.value
                     )
-                    browseViewModel.switchCategory(category = "filter")
+
+                    browseViewModel.switchCategory(category = "filter", newSearch = true)
+                    //browseViewModel.switchCategory(category = "filter")
                     /////////////////////////////
                 },
                 onFilterClicked = {
@@ -1155,7 +867,7 @@ fun BrowseScreen(
                                 var isFetching by remember { mutableStateOf(false) }
 
                                 LaunchedEffect((feedUiState as? UiState.Success<List<MangaModel>>)?.data?.size) {
-                                    if (!isFetching && feedUiState !is UiState.Loading) {
+                                    if (!isFetching && (feedUiState !is UiState.Loading) && browseViewModel.hasNextPage) {
                                         isFetching = true
                                         Log.e("TESTING", "yup its the end loading the 2nd one")
                                         browseViewModel.loadMangas()

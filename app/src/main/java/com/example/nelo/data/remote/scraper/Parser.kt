@@ -1,5 +1,6 @@
 package com.example.nelo.data.remote.scraper
 
+import android.util.Log
 import com.example.nelo.domain.model.AuthorModel
 import com.example.nelo.domain.model.ChapterModel
 import com.example.nelo.domain.model.FeedResponseModel
@@ -75,8 +76,37 @@ class Parser {
                     )},
                 limit = doc.select("div.truyen-list").firstOrNull()?.select("div")?.size?.dec() ?: 0,
                 total = doc.select("div.panel_page_number div.group_qty a.page_blue").firstOrNull()?.text()?.split(" ")?.get(1)?.trim()?.replace(",", "")?.toInt() ?: doc.select("div.truyen-list").firstOrNull()?.select("div")?.size?.dec() ?: 0,
+                page = doc.select("div.panel_page_number div.group_page div.page_select").firstOrNull()?.text()?.trim()?.toInt() ?: 1,
+                hasNextPage = (doc.select("div.panel_page_number div.group_page div.page_select").firstOrNull()?.text()?.trim()?.toInt() ?: 0) != (doc.select("div.panel_page_number div.group_page a.page_last").firstOrNull()?.text()?.split("(")?.get(1)?.replace(")", "")?.toInt() ?: 0)
+            )
+        )
+    }
+
+    fun searchFeedParser(doc: Document): Result<FeedResponseModel> {
+        Log.e("CURRENT PAGE", doc.select("div.panel_page_number div.group_page div.page_select").firstOrNull()?.text()?.trim() ?: "0")
+        Log.e("LAST PAGE", doc.select("div.panel_page_number div.group_page a.page_last").firstOrNull()?.text()?.split("(")?.get(1)?.replace(")", "") ?: "0")
+        Log.e("HAS NEXT PAGE", ((doc.select("div.panel_page_number div.group_page div.page_select").firstOrNull()?.text()?.trim()?.toInt() ?: 0) < (doc.select("div.panel_page_number div.group_page a.page_last").firstOrNull()?.text()?.split("(")?.get(1)?.replace(")", "")?.toInt() ?: 0)).toString())
+        return Result.success(
+            FeedResponseModel(
+                response = "ok",
+                data = doc.select("div.panel_story_list div.story_item").map {
+                    MangaModel(
+                        title = it.select("div.story_item_right h3 a").firstOrNull()?.text()?.trim(),
+                        thumbnail = it.select("a img").firstOrNull()?.attr("src"),
+                        authors = emptyList(),
+                        genres = emptyList(),
+                        status = null,
+                        updatedAt = "",
+                        description = "",
+                        view = it.select("span")?.get(2)?.text()?.split(":")?.get(1)?.trim(),
+                        rating = "??",
+                        mangaUrl = it.select("a").firstOrNull()?.attr("href"),
+                        chapterList = emptyList()
+                    )},
+                limit = doc.select("div.panel_story_list").firstOrNull()?.select("div.story_item")?.size?.dec() ?: 0,
+                total = doc.select("div.panel_page_number div.group_qty a.page_blue").firstOrNull()?.text()?.split(":")?.get(1)?.trim()?.split(" ")?.get(0)?.replace(",", "")?.toInt() ?: doc.select("div.div.panel_story_list").firstOrNull()?.select("div.story_item")?.size?.dec() ?: 0,
                 page = doc.select("div.panel_page_number div.group_page a.page_select").firstOrNull()?.text()?.trim()?.toInt() ?: 1,
-                hasNextPage = (doc.select("div.panel_page_number div.group_page a.page_select").firstOrNull()?.text()?.trim()?.toInt() ?: 0) != (doc.select("div.panel_page_number div.group_page a.page_last").firstOrNull()?.text()?.split("(")?.get(1)?.replace(")", "")?.toInt() ?: 0)
+                hasNextPage = (doc.select("div.panel_page_number div.group_page div.page_select").firstOrNull()?.text()?.trim()?.toInt() ?: 0) < (doc.select("div.panel_page_number div.group_page a.page_last").firstOrNull()?.text()?.split("(")?.get(1)?.replace(")", "")?.toInt() ?: 0)
             )
         )
     }

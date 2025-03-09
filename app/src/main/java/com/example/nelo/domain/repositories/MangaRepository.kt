@@ -11,5 +11,5 @@ interface MangaRepository {
     suspend fun getPopularMangas(page: Int): Result<FeedResponseModel>
     suspend fun getLatestMangas(page: Int): Result<FeedResponseModel>
     suspend fun getNewestMangas(page: Int): Result<FeedResponseModel>
-    suspend fun getFilteredMangas(filter: FilterModel, page: Int): Result<FeedResponseModel>
+    suspend fun getFilteredMangas(title: String = "", filter: FilterModel, page: Int): Result<FeedResponseModel>
 }

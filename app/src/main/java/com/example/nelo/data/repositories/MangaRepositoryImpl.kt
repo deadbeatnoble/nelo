@@ -118,8 +118,12 @@ class MangaRepositoryImpl(
         )
     }
 
-    override suspend fun getFilteredMangas(filter: FilterModel, page: Int): Result<FeedResponseModel> {
+    override suspend fun getFilteredMangas(title: String, filter: FilterModel, page: Int): Result<FeedResponseModel> {
+        //https://www.nelomanga.com/search/story/solo_leveling
         val url = buildString {
+            append("https://www.nelomanga.com/search/story/${title.replace(" ", "_")}${if (page > 1) "?page=${page}" else ""}")
+        }
+        /*val url = buildString {
             append("https://m.manganelo.com/advanced_search?s=all/")
 
             if (filter.include.isNotEmpty()) {
@@ -149,12 +153,12 @@ class MangaRepositoryImpl(
             if (filter.keyWord.isNotEmpty()) {
                 append("&keyw=${filter.keyWord}")
             }
-        }
+        }*/
 
         val documentData = pageScraper.scrapeWebPage(url)
         return documentData.fold(
             onSuccess = { document ->
-                val dataResult = parser.feedParser(document)
+                val dataResult = parser.searchFeedParser(document)
                 dataResult.fold(
                     onSuccess = { data ->
                         Result.success(data)
