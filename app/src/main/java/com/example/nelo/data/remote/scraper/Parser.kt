@@ -46,12 +46,12 @@ class Parser {
         )
     }
 
-    fun chapterDetailsParser(doc: Document, chapterTitle: String, referrer: String): Result<ChapterModel> {
+    fun chapterDetailsParser(doc: Document, chapterTitle: String, chapterUrl: String, referrer: String): Result<ChapterModel> {
         return Result.success(
             ChapterModel(
                 title = chapterTitle,
-                pages = doc.select("div.container-chapter-reader img").map { PageModel( title = it.attr("title") ?: null, pageImageUrl = it.attr("src") ?: null ) },
-                chapterUrl = referrer
+                pages = doc.select("div.container-chapter-reader img").map { PageModel( title = it.attr("title") ?: null, pageImageUrl = it.attr("src") ?: null, referrer = referrer ) },
+                chapterUrl = chapterUrl
             )
         )
     }

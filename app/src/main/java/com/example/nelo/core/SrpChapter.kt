@@ -22,13 +22,15 @@ fun srpChapter(
                 pageList.add(
                     PageModel(
                         title = pageImage.attr("title"),
-                        pageImageUrl = pageImage.attr("src")
+                        pageImageUrl = pageImage.attr("src"),
+                        referrer = null
                     )
                 )
             } ?: pageList.add(
                 PageModel(
                     title = null,
-                    pageImageUrl = null
+                    pageImageUrl = null,
+                    referrer = null
                 )
             )
         }

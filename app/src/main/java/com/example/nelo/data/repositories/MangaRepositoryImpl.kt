@@ -36,7 +36,7 @@ class MangaRepositoryImpl(
         val documentResult = pageScraper.scrapeWebPage(chapterUrl)
         return documentResult.fold(
             onSuccess = { document ->
-                val dataResult = parser.chapterDetailsParser(doc = document, chapterTitle = chapterTitle, referrer = "https://www.nelomanga.com/")
+                val dataResult = parser.chapterDetailsParser(doc = document, chapterTitle = chapterTitle, chapterUrl = chapterUrl, referrer = "https://www.nelomanga.com/")
                 dataResult.fold(
                     onSuccess = { data ->
                         Result.success(data)

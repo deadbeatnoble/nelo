@@ -143,7 +143,7 @@ fun PageListView(
                         SubcomposeAsyncImage(
                             model = ImageRequest
                                 .Builder(LocalContext.current)
-                                .addHeader("Referer", chapterDetail.chapterUrl)
+                                .addHeader("Referer", it.referrer!!)
                                 .data(it.pageImageUrl!!)
                                 .build(),
                             contentDescription = "page image",
